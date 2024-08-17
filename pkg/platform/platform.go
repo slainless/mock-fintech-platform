@@ -8,4 +8,7 @@ type Platform interface {
 
 	// mutation manager
 	MutationManager() TransactionMutationManager
+
+	// user manager
+	UserManager() UserManager
 }
