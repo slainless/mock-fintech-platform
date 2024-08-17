@@ -3,7 +3,7 @@ package platform
 import "time"
 
 type RecurrentTransactionManager interface {
-	BillingServices() []RecurrentBillingService
+	BillingServices() map[string]RecurrentBillingService
 
 	IntervalRegister(
 		monetaryService MonetaryService,

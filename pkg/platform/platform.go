@@ -11,4 +11,10 @@ type Platform interface {
 
 	// user manager
 	UserManager() UserManager
+
+	// money exchange manager
+	MoneyExchangeManager() MoneyExchangeManager
+
+	// recurrent transaction manager
+	RecurrentTransactionManager() RecurrentTransactionManager
 }
