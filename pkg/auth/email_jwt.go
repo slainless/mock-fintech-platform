@@ -7,12 +7,12 @@ import (
 	"github.com/kataras/jwt"
 )
 
-type SupabaseJWTAuthService struct {
-	secret string
+type EmailJWTAuthService struct {
+	secret []byte
 }
 
 // Credential implements platform.AuthService.
-func (*SupabaseJWTAuthService) Credential(ctx *gin.Context) (any, error) {
+func (*EmailJWTAuthService) Credential(ctx *gin.Context) (any, error) {
 	token := ctx.GetHeader("Authorization")
 	if token == "" {
 		return nil, ErrEmptyCredential
@@ -22,18 +22,18 @@ func (*SupabaseJWTAuthService) Credential(ctx *gin.Context) (any, error) {
 }
 
 // ServiceID implements platform.AuthService.
-func (*SupabaseJWTAuthService) ServiceID() string {
+func (*EmailJWTAuthService) ServiceID() string {
 	return "supabase_jwt"
 }
 
 // Validate implements platform.AuthService.
-func (*SupabaseJWTAuthService) Validate(ctx context.Context, credential any) (email string, err error) {
+func (s *EmailJWTAuthService) Validate(ctx context.Context, credential any) (email string, err error) {
 	v, ok := credential.(string)
 	if !ok {
 		return "", ErrInvalidCredential
 	}
 
-	token, err := jwt.Decode([]byte(v))
+	token, err := jwt.Verify(jwt.HS256, s.secret, []byte(v))
 	if err != nil {
 		return "", err
 	}

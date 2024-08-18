@@ -16,7 +16,7 @@ type Service struct {
 	accountManager *core.PaymentAccountManager
 	historyManager *core.TransactionHistoryManager
 
-	supabaseJwtAuth *auth.SupabaseJWTAuthService
+	emailJwtAuth *auth.EmailJWTAuthService
 
 	errorTracker platform.ErrorTracker
 }

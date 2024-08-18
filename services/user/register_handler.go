@@ -8,7 +8,7 @@ type Register struct {
 	Token string `json:"token" form:"token" binding:"required"`
 }
 
-func (s *Service) registerWithSupabase() gin.HandlerFunc {
+func (s *Service) registerWithEmail() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var register Register
 		err := c.Bind(&register)
@@ -16,7 +16,7 @@ func (s *Service) registerWithSupabase() gin.HandlerFunc {
 			return
 		}
 
-		email, err := s.supabaseJwtAuth.Validate(c, register.Token)
+		email, err := s.emailJwtAuth.Validate(c, register.Token)
 		if err != nil {
 			c.AbortWithStatusJSON(401, gin.H{"error": err.Error()})
 			return

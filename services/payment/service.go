@@ -18,7 +18,7 @@ type Service struct {
 	recurrentPaymentManager *core.RecurrentPaymentManager
 	paymentManager          *core.PaymentManager
 
-	supabaseJwtAuth *auth.SupabaseJWTAuthService
+	emailJwtAuth *auth.EmailJWTAuthService
 
 	errorTracker platform.ErrorTracker
 }
