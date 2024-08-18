@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-mkdir var/postgres
-chmod 777 var/postgres
+mkdir .data/postgres
+chmod 777 .data/postgres
 docker run \
   --rm \
   --name mock_fintech_postgres \
@@ -8,6 +8,6 @@ docker run \
   -e POSTGRES_DB=mock_fintech \
   -p 7777:5432 \
   -p 7776:80 \
-  -v $(pwd)/var/postgres:/var/lib/postgresql/data \
+  -v $(pwd)/.data/postgres:/var/lib/postgresql/data \
   -d \
   postgres
