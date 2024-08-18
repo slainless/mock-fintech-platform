@@ -1,0 +1,13 @@
+BEGIN;
+ALTER TABLE "users" ALTER COLUMN "full_name" DROP NOT NULL;
+ALTER TABLE "monetary_accounts" ALTER COLUMN "user_uuid" DROP NOT NULL;
+ALTER TABLE "monetary_accounts" ALTER COLUMN "balance" DROP NOT NULL;
+ALTER TABLE "monetary_accounts" ALTER COLUMN "currency" DROP NOT NULL;
+ALTER TABLE "monetary_accounts" ALTER COLUMN "service_id" DROP NOT NULL;
+ALTER TABLE "transaction_histories" ALTER COLUMN "service_id" DROP NOT NULL;
+ALTER TABLE "transaction_histories" ALTER COLUMN "mutation" DROP NOT NULL;
+ALTER TABLE "transaction_histories" ALTER COLUMN "currency" DROP NOT NULL;
+ALTER TABLE "transaction_histories" ALTER COLUMN "status" DROP NOT NULL;
+ALTER TABLE "recurring_payments" ALTER COLUMN "account_uuid" DROP NOT NULL;
+ALTER TABLE "recurring_payments" ALTER COLUMN "scheduler_type" DROP NOT NULL;
+COMMIT;

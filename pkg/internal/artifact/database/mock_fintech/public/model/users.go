@@ -10,7 +10,7 @@ package model
 type Users struct {
 	ID           int32
 	UUID         string
-	FullName     *string
+	FullName     string
 	UserName     *string
 	PasswordHash *string
 }

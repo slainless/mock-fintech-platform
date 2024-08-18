@@ -14,8 +14,8 @@ import (
 type RecurringPayments struct {
 	ID            int32
 	ServiceID     string
-	AccountUUID   *string
-	SchedulerType *int16
+	AccountUUID   string
+	SchedulerType int16
 	LastCharge    *time.Time
 	UUID          string
 }

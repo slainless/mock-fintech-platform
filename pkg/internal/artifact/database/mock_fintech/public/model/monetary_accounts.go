@@ -10,8 +10,8 @@ package model
 type MonetaryAccounts struct {
 	ID        int32
 	UUID      string
-	UserUUID  *string
-	ServiceID *string
-	Balance   *int64
-	Currency  *string
+	UserUUID  string
+	ServiceID string
+	Balance   int64
+	Currency  string
 }
