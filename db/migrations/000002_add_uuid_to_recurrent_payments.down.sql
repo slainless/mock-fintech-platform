@@ -1,1 +1,0 @@
-ALTER TABLE "recurring_payments" DROP COLUMN "uuid";

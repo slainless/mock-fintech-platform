@@ -18,11 +18,11 @@ type recurringPaymentsTable struct {
 
 	// Columns
 	ID            postgres.ColumnInteger
+	UUID          postgres.ColumnString
 	ServiceID     postgres.ColumnString
 	AccountUUID   postgres.ColumnString
 	SchedulerType postgres.ColumnInteger
 	LastCharge    postgres.ColumnTimestamp
-	UUID          postgres.ColumnString
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -64,13 +64,13 @@ func newRecurringPaymentsTable(schemaName, tableName, alias string) *RecurringPa
 func newRecurringPaymentsTableImpl(schemaName, tableName, alias string) recurringPaymentsTable {
 	var (
 		IDColumn            = postgres.IntegerColumn("id")
+		UUIDColumn          = postgres.StringColumn("uuid")
 		ServiceIDColumn     = postgres.StringColumn("service_id")
 		AccountUUIDColumn   = postgres.StringColumn("account_uuid")
 		SchedulerTypeColumn = postgres.IntegerColumn("scheduler_type")
 		LastChargeColumn    = postgres.TimestampColumn("last_charge")
-		UUIDColumn          = postgres.StringColumn("uuid")
-		allColumns          = postgres.ColumnList{IDColumn, ServiceIDColumn, AccountUUIDColumn, SchedulerTypeColumn, LastChargeColumn, UUIDColumn}
-		mutableColumns      = postgres.ColumnList{IDColumn, ServiceIDColumn, AccountUUIDColumn, SchedulerTypeColumn, LastChargeColumn, UUIDColumn}
+		allColumns          = postgres.ColumnList{IDColumn, UUIDColumn, ServiceIDColumn, AccountUUIDColumn, SchedulerTypeColumn, LastChargeColumn}
+		mutableColumns      = postgres.ColumnList{IDColumn, UUIDColumn, ServiceIDColumn, AccountUUIDColumn, SchedulerTypeColumn, LastChargeColumn}
 	)
 
 	return recurringPaymentsTable{
@@ -78,11 +78,11 @@ func newRecurringPaymentsTableImpl(schemaName, tableName, alias string) recurrin
 
 		//Columns
 		ID:            IDColumn,
+		UUID:          UUIDColumn,
 		ServiceID:     ServiceIDColumn,
 		AccountUUID:   AccountUUIDColumn,
 		SchedulerType: SchedulerTypeColumn,
 		LastCharge:    LastChargeColumn,
-		UUID:          UUIDColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

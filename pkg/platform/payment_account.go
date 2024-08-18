@@ -1,6 +1,6 @@
 package platform
 
-type MonetaryAccount interface {
+type PaymentAccount interface {
 	ID() string
 	ServiceID() string
 
@@ -8,5 +8,5 @@ type MonetaryAccount interface {
 
 	// lets just assume balance can be negative
 	// since the value came from payment service
-	TrackedBalance() MonetaryAmount
+	Balance() MonetaryAmount
 }

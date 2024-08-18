@@ -21,6 +21,7 @@ type usersTable struct {
 	UUID         postgres.ColumnString
 	FullName     postgres.ColumnString
 	UserName     postgres.ColumnString
+	Email        postgres.ColumnString
 	PasswordHash postgres.ColumnString
 
 	AllColumns     postgres.ColumnList
@@ -66,9 +67,10 @@ func newUsersTableImpl(schemaName, tableName, alias string) usersTable {
 		UUIDColumn         = postgres.StringColumn("uuid")
 		FullNameColumn     = postgres.StringColumn("full_name")
 		UserNameColumn     = postgres.StringColumn("user_name")
+		EmailColumn        = postgres.StringColumn("email")
 		PasswordHashColumn = postgres.StringColumn("password_hash")
-		allColumns         = postgres.ColumnList{IDColumn, UUIDColumn, FullNameColumn, UserNameColumn, PasswordHashColumn}
-		mutableColumns     = postgres.ColumnList{IDColumn, UUIDColumn, FullNameColumn, UserNameColumn, PasswordHashColumn}
+		allColumns         = postgres.ColumnList{IDColumn, UUIDColumn, FullNameColumn, UserNameColumn, EmailColumn, PasswordHashColumn}
+		mutableColumns     = postgres.ColumnList{IDColumn, UUIDColumn, FullNameColumn, UserNameColumn, EmailColumn, PasswordHashColumn}
 	)
 
 	return usersTable{
@@ -79,6 +81,7 @@ func newUsersTableImpl(schemaName, tableName, alias string) usersTable {
 		UUID:         UUIDColumn,
 		FullName:     FullNameColumn,
 		UserName:     UserNameColumn,
+		Email:        EmailColumn,
 		PasswordHash: PasswordHashColumn,
 
 		AllColumns:     allColumns,

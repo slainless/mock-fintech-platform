@@ -7,7 +7,7 @@
 
 package model
 
-type MonetaryAccounts struct {
+type PaymentAccounts struct {
 	ID        int32
 	UUID      string
 	UserUUID  string

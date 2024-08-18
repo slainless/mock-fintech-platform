@@ -3,17 +3,20 @@ package platform
 import "time"
 
 type TransactionStatus uint32
+type TransactionType uint32
 
 type TransactionHistory interface {
 	ID() string
+	ServiceID() string
+	UserID() string
 
 	BalanceMutation() *MonetaryAmount
-	Service() MonetaryService
-	User() User
 
 	Timestamp() *time.Time
 	Address() string
 
 	Status() TransactionStatus
+	Type() TransactionType
+
 	Note() string
 }

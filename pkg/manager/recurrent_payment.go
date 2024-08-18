@@ -1,3 +1,3 @@
-package core
+package manager
 
 type RecurrentPaymentManager struct{}

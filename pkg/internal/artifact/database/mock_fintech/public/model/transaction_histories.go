@@ -7,14 +7,20 @@
 
 package model
 
+import (
+	"time"
+)
+
 type TransactionHistories struct {
 	ID              int32
 	UUID            string
-	UserUUID        *string
+	UserUUID        string
 	ServiceID       string
 	Mutation        int64
 	Currency        string
 	Status          int16
 	Address         *string
 	TransactionNote *string
+	TransactionDate time.Time
+	TransactionType int16
 }
