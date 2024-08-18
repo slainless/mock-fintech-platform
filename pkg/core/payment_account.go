@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/google/uuid"
+	"github.com/slainless/mock-fintech-platform/pkg/internal/artifact/database/mock_fintech/public/model"
 	"github.com/slainless/mock-fintech-platform/pkg/internal/query"
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
@@ -13,6 +15,9 @@ var ErrInvalidTransferDestination = errors.New("invalid transfer destination")
 var ErrInvalidAccount = errors.New("invalid account")
 
 type PaymentAccountManager struct {
+	services     map[string]platform.PaymentService
+	errorTracker platform.ErrorTracker
+
 	db *sql.DB
 }
 
@@ -53,4 +58,47 @@ func (m *PaymentAccountManager) PrepareTransfer(ctx context.Context, fromUUID, t
 
 func (m *PaymentAccountManager) CheckOwner(ctx context.Context, user *platform.User, accountUUID string) error {
 	return query.CheckOwner(ctx, m.db, user.UUID, accountUUID)
+}
+
+func (m *PaymentAccountManager) GetBalance(ctx context.Context, account *platform.PaymentAccount) (*platform.MonetaryAmount, error) {
+	service := m.services[account.ServiceID]
+	if service == nil {
+		return nil, ErrPaymentServiceNotSupported
+	}
+
+	return service.Balance(ctx, account)
+}
+
+func (m *PaymentAccountManager) Register(ctx context.Context, user *platform.User, serviceID string, name string, accountForeignID string, CallbackData string) (*platform.PaymentAccount, error) {
+	service := m.services[serviceID]
+	if service == nil {
+		return nil, ErrPaymentServiceNotSupported
+	}
+
+	err := service.Validate(ctx, user, accountForeignID, CallbackData)
+	if err != nil {
+		return nil, err
+	}
+
+	uuid, err := uuid.NewV7()
+	if err != nil {
+		return nil, err
+	}
+
+	account := &platform.PaymentAccount{
+		PaymentAccounts: model.PaymentAccounts{
+			UUID:      uuid.String(),
+			UserUUID:  user.UUID,
+			ServiceID: serviceID,
+			ForeignID: accountForeignID,
+			Name:      &name,
+		},
+	}
+	err = query.InsertAccount(ctx, m.db, account)
+	if err != nil {
+		m.errorTracker.Report(ctx, err)
+		return nil, err
+	}
+
+	return account, nil
 }

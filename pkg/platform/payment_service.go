@@ -13,4 +13,10 @@ type PaymentService interface {
 
 	// Get matching history from destination service/account
 	GetMatchingHistory(ctx context.Context, account *PaymentAccount, history *TransactionHistory) (*TransactionHistory, error)
+
+	// Get balance
+	Balance(ctx context.Context, account *PaymentAccount) (*MonetaryAmount, error)
+
+	// Validate user
+	Validate(ctx context.Context, user *User, accountForeignID string, callbackData string) error
 }

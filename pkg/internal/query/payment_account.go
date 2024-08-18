@@ -79,3 +79,17 @@ func CheckOwner(ctx context.Context, db *sql.DB, userUUID, accountUUID string) e
 
 	return nil
 }
+
+func InsertAccount(ctx context.Context, db *sql.DB, account *platform.PaymentAccount) error {
+	stmt := table.PaymentAccounts.INSERT(
+		table.PaymentAccounts.AllColumns.Except(table.PaymentAccounts.ID),
+	).
+		VALUES(account)
+
+	_, err := stmt.ExecContext(ctx, db)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

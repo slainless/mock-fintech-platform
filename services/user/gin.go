@@ -7,6 +7,9 @@ func (s *Service) Mount(r gin.IRouter) {
 
 	my := r.Group("/my")
 	my.Use(s.authManager.Middleware(s.supabaseJwtAuth))
-	my.GET("/accounts", s.accounts())
+	my.GET("/account", s.accounts())
 	my.GET("/history", s.histories())
+
+	my.POST("/account", s.create())
+	my.GET("/account/:uuid", s.account())
 }
