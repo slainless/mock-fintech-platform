@@ -12,6 +12,6 @@ type PaymentAccounts struct {
 	UUID      string
 	UserUUID  string
 	ServiceID string
-	Balance   int64
-	Currency  string
+	Name      *string
+	ForeignID *string
 }
