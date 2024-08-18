@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	. "github.com/go-jet/jet/v2/postgres"
+	"github.com/google/uuid"
 	"github.com/slainless/mock-fintech-platform/pkg/internal/artifact/database/mock_fintech/public/model"
 	"github.com/slainless/mock-fintech-platform/pkg/internal/artifact/database/mock_fintech/public/table"
 	"golang.org/x/crypto/bcrypt"
@@ -38,12 +39,7 @@ func GetUser(ctx context.Context, db *sql.DB, email string) (*model.Users, error
 	return &user, nil
 }
 
-func Authenticate(
-	ctx context.Context,
-	db *sql.DB,
-	email string,
-	password []byte,
-) (string, error) {
+func Authenticate(ctx context.Context, db *sql.DB, email string, password []byte) (string, error) {
 	stmt := SELECT(
 		table.Users.PasswordHash,
 		table.Users.UUID,
@@ -65,4 +61,22 @@ func Authenticate(
 	return user.UUID, nil
 }
 
-// func InsertUser(ctx context.Context, db *sql.DB, user *UserModel) error {}
+func InsertFreshUser(ctx context.Context, db *sql.DB, email string) error {
+	uuid, err := uuid.NewV7()
+	if err != nil {
+		return err
+	}
+
+	stmt := table.Users.INSERT(
+		table.Users.Email,
+		table.Users.UUID,
+	).
+		VALUES(String(email), String(uuid.String()))
+
+	_, err = stmt.ExecContext(ctx, db)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
