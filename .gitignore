@@ -3,3 +3,4 @@ bin/*
 .env
 .data/*
 !.data/README
+VERSION

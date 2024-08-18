@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+./scripts/env.sh ./scripts/jetgen.sh
+go generate ./...
