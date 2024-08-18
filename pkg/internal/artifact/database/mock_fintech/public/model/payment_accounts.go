@@ -13,5 +13,5 @@ type PaymentAccounts struct {
 	UserUUID  string
 	ServiceID string
 	Name      *string
-	ForeignID *string
+	ForeignID string
 }
