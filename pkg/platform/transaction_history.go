@@ -10,13 +10,16 @@ type TransactionHistory interface {
 	ServiceID() string
 	UserID() string
 
+	AccountID() string
+	DestAccountID() *string
+
 	BalanceMutation() *MonetaryAmount
 
 	Timestamp() *time.Time
-	Address() string
+	Address() *string
 
 	Status() TransactionStatus
 	Type() TransactionType
 
-	Note() string
+	Note() *string
 }

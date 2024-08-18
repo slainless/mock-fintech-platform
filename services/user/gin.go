@@ -7,4 +7,6 @@ func (s *UserService) Mount(r gin.IRouter) {
 
 	my := r.Group("/my")
 	my.Use(s.authManager.Middleware(s.supabaseJwtAuth))
+	my.GET("/accounts", accounts(s.authManager, s.accountManager))
+	my.GET("/history", histories(s.authManager, s.historyManager))
 }
