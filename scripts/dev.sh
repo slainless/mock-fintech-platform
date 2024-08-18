@@ -1,19 +1,22 @@
 #!/usr/bin/env bash
 echo "Starting dev environment"
 
-echo "Running postgres container"
-POSTGRES_CONTAINER="$(./scripts/run_postgres.sh)"
-echo "Postgres container = ${POSTGRES_CONTAINER}"
+destroy() {
+  echo "Cleaning dev containers"
+  docker stop mock_fintech_pgadmin mock_fintech_postgres
+  # in case the container is persisted...
+  docker rm mock_fintech_pgadmin mock_fintech_postgres
+}
 
+destroy
+echo "Running postgres container"
+./scripts/run_postgres.sh
 echo "Running pgadmin container"
-PGADMIN_CONTAINER="$(./scripts/run_pgadmin.sh)"
-echo "pgadmin container = ${PGADMIN_CONTAINER}"
+./scripts/run_pgadmin.sh
 
 cleanup() {
   echo "SIGINT received, cleaning up..."
-  docker stop ${POSTGRES_CONTAINER} ${PGADMIN_CONTAINER}
-  # in case the container is persisted...
-  docker rm ${POSTGRES_CONTAINER} ${PGADMIN_CONTAINER}
+  destroy
   exit 0
 }
 
