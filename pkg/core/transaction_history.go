@@ -14,6 +14,12 @@ type TransactionHistoryManager struct {
 	db *sql.DB
 }
 
+func NewTransactionHistoryManager(db *sql.DB) *TransactionHistoryManager {
+	return &TransactionHistoryManager{
+		db: db,
+	}
+}
+
 func (m *TransactionHistoryManager) GetHistories(ctx context.Context, user *platform.User, from, to time.Time) ([]platform.TransactionHistory, error) {
 	histories, err := query.GetHistories(ctx, m.db, user.UUID, from, to)
 	if err != nil {

@@ -11,6 +11,12 @@ type EmailJWTAuthService struct {
 	secret []byte
 }
 
+func NewEmailJWTAuthService(secret []byte) *EmailJWTAuthService {
+	return &EmailJWTAuthService{
+		secret: secret,
+	}
+}
+
 // Credential implements platform.AuthService.
 func (*EmailJWTAuthService) Credential(ctx *gin.Context) (any, error) {
 	token := ctx.GetHeader("Authorization")

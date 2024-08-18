@@ -21,6 +21,15 @@ type PaymentAccountManager struct {
 	db *sql.DB
 }
 
+func NewPaymentAccountManager(db *sql.DB, svc map[string]platform.PaymentService, tracker platform.ErrorTracker) *PaymentAccountManager {
+	return &PaymentAccountManager{
+		db: db,
+
+		services:     svc,
+		errorTracker: tracker,
+	}
+}
+
 func (m *PaymentAccountManager) GetAccounts(ctx context.Context, user *platform.User) ([]platform.PaymentAccount, error) {
 	accounts, err := query.GetAllAccounts(ctx, m.db, user.UUID)
 	if err != nil {

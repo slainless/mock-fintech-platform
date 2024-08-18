@@ -11,6 +11,12 @@ type AuthManager struct {
 	UserManager *UserManager
 }
 
+func NewAuthManager(userManager *UserManager) *AuthManager {
+	return &AuthManager{
+		UserManager: userManager,
+	}
+}
+
 func (m *AuthManager) Validate(ctx context.Context, service platform.AuthService, credential any) (*platform.User, error) {
 	email, err := service.Validate(ctx, credential)
 	if err != nil {

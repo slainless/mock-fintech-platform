@@ -19,6 +19,15 @@ type PaymentManager struct {
 	historyManager *TransactionHistoryManager
 }
 
+func NewPaymentManager(account *PaymentAccountManager, history *TransactionHistoryManager, svc map[string]platform.PaymentService, tracker platform.ErrorTracker) *PaymentManager {
+	return &PaymentManager{
+		accountManager: account,
+		historyManager: history,
+		services:       svc,
+		errorTracker:   tracker,
+	}
+}
+
 func (m *PaymentManager) Send(ctx context.Context, from, to *platform.PaymentAccount, amount int64) (*platform.TransactionHistory, error) {
 	service := m.services[from.ServiceID]
 	if service == nil {
