@@ -7,5 +7,5 @@ func (s *Service) Mount(r gin.IRouter) {
 	my.Use(s.authManager.Middleware(s.supabaseJwtAuth))
 
 	my.GET("/send", s.send())
-	// my.GET("/withdraw", withdraw())
+	my.GET("/withdraw", s.withdraw())
 }

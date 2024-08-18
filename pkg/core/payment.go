@@ -19,12 +19,7 @@ type PaymentManager struct {
 	historyManager *TransactionHistoryManager
 }
 
-func (m *PaymentManager) Send(ctx context.Context, fromUUID, toUUID string, amount int64) (*platform.TransactionHistory, error) {
-	from, to, err := m.accountManager.PrepareTransfer(ctx, fromUUID, toUUID)
-	if err != nil {
-		return nil, err
-	}
-
+func (m *PaymentManager) Send(ctx context.Context, from, to *platform.PaymentAccount, amount int64) (*platform.TransactionHistory, error) {
 	service := m.services[from.ServiceID]
 	if service == nil {
 		return nil, ErrPaymentServiceNotSupported
@@ -39,7 +34,7 @@ func (m *PaymentManager) Send(ctx context.Context, fromUUID, toUUID string, amou
 	destHistory, err = service.GetMatchingHistory(ctx, to, sourceHistory)
 	if err != nil {
 		m.errorTracker.Report(ctx, err)
-		destHistory = m.historyManager.CreateMakeshiftMatchingTransferHistory(ctx, sourceHistory, fmt.Sprintf("Transfer from %s", fromUUID))
+		destHistory = m.historyManager.CreateMakeshiftMatchingTransferHistory(ctx, sourceHistory, fmt.Sprintf("Transfer from %s", from.UUID))
 		return nil, err
 	}
 
@@ -48,5 +43,23 @@ func (m *PaymentManager) Send(ctx context.Context, fromUUID, toUUID string, amou
 			*sourceHistory,
 			*destHistory,
 		}))
+
 	return sourceHistory, nil
+}
+
+func (m *PaymentManager) Withdraw(ctx context.Context, from *platform.PaymentAccount, amount int64, callbackData string) (*platform.TransactionHistory, error) {
+	service := m.services[from.ServiceID]
+	if service == nil {
+		return nil, ErrPaymentServiceNotSupported
+	}
+
+	history, err := service.Withdraw(ctx, from, amount, callbackData)
+	if err != nil {
+		return nil, err
+	}
+
+	m.errorTracker.Report(ctx,
+		m.historyManager.Records(ctx, []platform.TransactionHistory{*history}))
+
+	return history, nil
 }

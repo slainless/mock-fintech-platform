@@ -5,6 +5,7 @@ import (
 
 	"github.com/slainless/mock-fintech-platform/pkg/auth"
 	"github.com/slainless/mock-fintech-platform/pkg/core"
+	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
 
 type Service struct {
@@ -18,4 +19,6 @@ type Service struct {
 	paymentManager          *core.PaymentManager
 
 	supabaseJwtAuth *auth.SupabaseJWTAuthService
+
+	errorTracker platform.ErrorTracker
 }
