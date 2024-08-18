@@ -5,7 +5,7 @@ CREATE TABLE "users" (
   "uuid" char(36) UNIQUE NOT NULL,
   "full_name" varchar(255),
   "user_name" varchar(255),
-  "email" varchar(255) NOT NULL,
+  "email" varchar(255) UNIQUE NOT NULL,
   "password_hash" varchar(60)
 );
 
