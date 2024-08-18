@@ -11,7 +11,7 @@ type AuthManager struct {
 	UserManager *UserManager
 }
 
-func (m *AuthManager) Validate(ctx context.Context, service platform.AuthService, credential any) (platform.User, error) {
+func (m *AuthManager) Validate(ctx context.Context, service platform.AuthService, credential any) (*platform.User, error) {
 	email, err := service.Validate(ctx, credential)
 	if err != nil {
 		return nil, err
@@ -38,17 +38,17 @@ func (m *AuthManager) Middleware(service platform.AuthService) gin.HandlerFunc {
 	}
 }
 
-func (m *AuthManager) SetUser(c *gin.Context, user platform.User) {
+func (m *AuthManager) SetUser(c *gin.Context, user *platform.User) {
 	c.Set("__auth_manager_user", user)
 }
 
-func (m *AuthManager) GetUser(c *gin.Context) platform.User {
+func (m *AuthManager) GetUser(c *gin.Context) *platform.User {
 	user, ok := c.Get("__auth_manager_user")
 	if !ok {
 		return nil
 	}
 
-	if u, ok := user.(platform.User); ok {
+	if u, ok := user.(*platform.User); ok {
 		return u
 	} else {
 		return nil

@@ -1,18 +1,21 @@
-package user
+package payment
 
 import (
 	"database/sql"
 
+	"github.com/slainless/mock-fintech-platform/pkg/auth"
 	"github.com/slainless/mock-fintech-platform/pkg/core"
 )
 
 type Service struct {
 	db *sql.DB
 
-	AuthManager             *core.AuthManager
-	UserManager             *core.UserManager
-	AccountManager          *core.PaymentAccountManager
-	HistoryManager          *core.TransactionHistoryManager
-	RecurrentPaymentManager *core.RecurrentPaymentManager
-	PaymentManager          *core.PaymentManager
+	authManager             *core.AuthManager
+	userManager             *core.UserManager
+	accountManager          *core.PaymentAccountManager
+	historyManager          *core.TransactionHistoryManager
+	recurrentPaymentManager *core.RecurrentPaymentManager
+	paymentManager          *core.PaymentManager
+
+	supabaseJwtAuth *auth.SupabaseJWTAuthService
 }

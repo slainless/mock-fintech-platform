@@ -1,12 +1,7 @@
 package platform
 
-type PaymentAccount interface {
-	ID() string
-	ServiceID() string
+import "github.com/slainless/mock-fintech-platform/pkg/internal/artifact/database/mock_fintech/public/model"
 
-	Currency() Currency
-
-	// lets just assume balance can be negative
-	// since the value came from payment service
-	Balance() MonetaryAmount
+type PaymentAccount struct {
+	model.PaymentAccounts
 }

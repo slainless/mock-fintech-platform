@@ -8,10 +8,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/slainless/mock-fintech-platform/pkg/internal/artifact/database/mock_fintech/public/model"
 	"github.com/slainless/mock-fintech-platform/pkg/internal/artifact/database/mock_fintech/public/table"
+	"github.com/slainless/mock-fintech-platform/pkg/platform"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func GetUserInto(ctx context.Context, db *sql.DB, email string, user *model.Users) error {
+func GetUserInto(ctx context.Context, db *sql.DB, email string, user *platform.User) error {
 	stmt := SELECT(
 		table.Users.UUID,
 		table.Users.FullName,
@@ -28,9 +29,8 @@ func GetUserInto(ctx context.Context, db *sql.DB, email string, user *model.User
 	return nil
 }
 
-func GetUser(ctx context.Context, db *sql.DB, email string) (*model.Users, error) {
-	var user model.Users
-
+func GetUser(ctx context.Context, db *sql.DB, email string) (*platform.User, error) {
+	var user platform.User
 	err := GetUserInto(ctx, db, email, &user)
 	if err != nil {
 		return nil, err

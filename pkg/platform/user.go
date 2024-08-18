@@ -1,8 +1,7 @@
 package platform
 
-type User interface {
-	// should returns UUID of user
-	ID() string
+import "github.com/slainless/mock-fintech-platform/pkg/internal/artifact/database/mock_fintech/public/model"
 
-	Email() string
+type User struct {
+	model.Users
 }

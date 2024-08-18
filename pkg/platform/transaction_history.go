@@ -1,25 +1,19 @@
 package platform
 
-import "time"
+import (
+	"github.com/slainless/mock-fintech-platform/pkg/internal/artifact/database/mock_fintech/public/model"
+)
 
-type TransactionStatus uint32
-type TransactionType uint32
+type TransactionHistory struct {
+	model.TransactionHistories
+	ServiceUUID string
+	UserUUID    string
+}
 
-type TransactionHistory interface {
-	ID() string
-	ServiceID() string
-	UserID() string
-
-	AccountID() string
-	DestAccountID() *string
-
-	BalanceMutation() *MonetaryAmount
-
-	Timestamp() *time.Time
-	Address() *string
-
-	Status() TransactionStatus
-	Type() TransactionType
-
-	Note() *string
+func (t *TransactionHistory) Clone() TransactionHistory {
+	return TransactionHistory{
+		TransactionHistories: t.TransactionHistories,
+		ServiceUUID:          t.ServiceUUID,
+		UserUUID:             t.UserUUID,
+	}
 }

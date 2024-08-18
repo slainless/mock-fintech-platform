@@ -18,13 +18,13 @@ func NewUserManager(db *sql.DB) *UserManager {
 	}
 }
 
-func (m *UserManager) GetUserByEmail(ctx context.Context, email string) (platform.User, error) {
-	model, err := query.GetUser(ctx, m.db, email)
+func (m *UserManager) GetUserByEmail(ctx context.Context, email string) (*platform.User, error) {
+	user, err := query.GetUser(ctx, m.db, email)
 	if err != nil {
 		return nil, err
 	}
 
-	return UserFrom(model), nil
+	return user, nil
 }
 
 func (m *UserManager) Register(ctx context.Context, email string) error {
