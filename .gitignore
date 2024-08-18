@@ -1,3 +1,5 @@
 bin/*
 !bin/README
 .env
+var/*
+!var/README
