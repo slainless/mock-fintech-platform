@@ -15,7 +15,7 @@ type Service struct {
 	userManager             *core.UserManager
 	accountManager          *core.PaymentAccountManager
 	historyManager          *core.TransactionHistoryManager
-	recurrentPaymentManager *core.RecurrentPaymentManager
+	recurringPaymentManager *core.RecurringPaymentManager
 	paymentManager          *core.PaymentManager
 
 	emailJwtAuth *auth.EmailJWTAuthService
