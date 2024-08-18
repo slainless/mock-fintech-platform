@@ -19,6 +19,7 @@ func main() {
 		Usage:   "Provides services for payment-related operations",
 		Version: version,
 		Action:  action,
+		Flags:   flags,
 	}
 
 	err := app.Run(os.Args)
