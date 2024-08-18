@@ -21,5 +21,5 @@ func action(ctx *cli.Context) error {
 	app := gin.Default()
 	service.Mount(app)
 
-	return app.Run()
+	return app.Run(flagAddress.Value()...)
 }

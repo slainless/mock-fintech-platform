@@ -12,6 +12,10 @@ var (
 	flagAuthSecret string
 )
 
+var (
+	flagAddress cli.StringSlice
+)
+
 var flags = []cli.Flag{
 	&cli.StringFlag{
 		Name:        "postgresql-url",
@@ -30,5 +34,15 @@ var flags = []cli.Flag{
 		Category:    "Authentication",
 		Required:    true,
 		Destination: &flagAuthSecret,
+	},
+	&cli.StringSliceFlag{
+		Name:        "port",
+		Aliases:     []string{"p"},
+		Usage:       "Port",
+		EnvVars:     []string{"PORT"},
+		Category:    "Server",
+		Required:    false,
+		Value:       cli.NewStringSlice(":8080"),
+		Destination: &flagAddress,
 	},
 }
