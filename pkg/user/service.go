@@ -13,8 +13,6 @@ type UserService struct {
 	userManager    *core.UserManager
 	accountManager *core.MonetaryAccountManager
 	historyManager *core.TransactionHistoryManager
-
-	services map[string]platform.MonetaryService
 }
 
 func (s *UserService) MonetaryServices() map[string]platform.MonetaryService {

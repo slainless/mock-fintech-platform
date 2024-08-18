@@ -2,6 +2,7 @@ package platform
 
 type MonetaryAccount interface {
 	ID() string
+	ServiceID() string
 
 	Currency() Currency
 

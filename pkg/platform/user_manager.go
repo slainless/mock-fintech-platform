@@ -7,10 +7,10 @@ import (
 )
 
 type UserManager interface {
-	Login(ctx context.Context, service AuthService, credential any) (User, error)
+	Authenticate(ctx context.Context, service AuthService, credential any) (User, error)
+	Register(ctx context.Context, email string) (User, error)
 
-	Logout(ctx context.Context, service AuthService, user User) error
-	LogoutByID(ctx context.Context, service AuthService, userID string) error
+	Revoke(ctx context.Context, service AuthService, credential any) error
 
 	AuthWall() gin.HandlerFunc
 }
