@@ -1,4 +1,4 @@
-package manager
+package core
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 
 	"github.com/slainless/mock-fintech-platform/pkg/internal/query"
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
-	"github.com/slainless/mock-fintech-platform/pkg/user"
 )
 
 type UserManager struct {
@@ -25,7 +24,7 @@ func (m *UserManager) GetUserByEmail(ctx context.Context, email string) (platfor
 		return nil, err
 	}
 
-	return user.NewUser(model), nil
+	return UserFrom(model), nil
 }
 
 func (m *UserManager) Register(ctx context.Context, email string) error {

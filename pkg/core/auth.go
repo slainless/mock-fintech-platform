@@ -1,4 +1,4 @@
-package manager
+package core
 
 import (
 	"context"
@@ -43,5 +43,14 @@ func (m *AuthManager) SetUser(c *gin.Context, user platform.User) {
 }
 
 func (m *AuthManager) GetUser(c *gin.Context) platform.User {
-	return c.MustGet("__auth_manager_user").(platform.User)
+	user, ok := c.Get("__auth_manager_user")
+	if !ok {
+		return nil
+	}
+
+	if u, ok := user.(platform.User); ok {
+		return u
+	} else {
+		return nil
+	}
 }

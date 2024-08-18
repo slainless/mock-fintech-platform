@@ -2,11 +2,11 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/slainless/mock-fintech-platform/pkg/manager"
+	"github.com/slainless/mock-fintech-platform/pkg/core"
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
 
-func register(service platform.AuthService, manager *manager.UserManager) gin.HandlerFunc {
+func register(service platform.AuthService, manager *core.UserManager) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		email, err := service.Validate(c, c.Request)
 		if err != nil {

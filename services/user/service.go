@@ -4,16 +4,16 @@ import (
 	"database/sql"
 
 	"github.com/slainless/mock-fintech-platform/pkg/auth"
-	"github.com/slainless/mock-fintech-platform/pkg/manager"
+	"github.com/slainless/mock-fintech-platform/pkg/core"
 )
 
 type UserService struct {
 	db *sql.DB
 
-	authManager    *manager.AuthManager
-	userManager    *manager.UserManager
-	accountManager *manager.PaymentAccountManager
-	historyManager *manager.TransactionHistoryManager
+	authManager    *core.AuthManager
+	userManager    *core.UserManager
+	accountManager *core.PaymentAccountManager
+	historyManager *core.TransactionHistoryManager
 
 	supabaseJwtAuth *auth.SupabaseJWTAuthService
 }

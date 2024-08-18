@@ -1,3 +1,3 @@
-package manager
+package core
 
 type TransactionHistoryManager struct{}
