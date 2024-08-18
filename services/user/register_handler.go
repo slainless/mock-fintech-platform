@@ -2,19 +2,27 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/slainless/mock-fintech-platform/pkg/core"
-	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
 
-func register(service platform.AuthService, manager *core.UserManager) gin.HandlerFunc {
+type Register struct {
+	Token string `json:"token" form:"token" binding:"required"`
+}
+
+func (s *Service) registerWithSupabase() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		email, err := service.Validate(c, c.Request)
+		var register Register
+		err := c.Bind(&register)
+		if err != nil {
+			return
+		}
+
+		email, err := s.supabaseJwtAuth.Validate(c, register.Token)
 		if err != nil {
 			c.AbortWithStatusJSON(401, gin.H{"error": err.Error()})
 			return
 		}
 
-		err = manager.Register(c, email)
+		err = s.userManager.Register(c, email)
 		if err != nil {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 			return
