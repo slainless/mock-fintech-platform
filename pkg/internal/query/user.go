@@ -10,14 +10,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func GetUserInto(ctx context.Context, db *sql.DB, uuid string, user *model.Users) error {
+func GetUserInto(ctx context.Context, db *sql.DB, email string, user *model.Users) error {
 	stmt := SELECT(
 		table.Users.UUID,
 		table.Users.FullName,
 		table.Users.UserName,
 	).
 		FROM(table.Users).
-		WHERE(table.Users.UUID.EQ(String(uuid)))
+		WHERE(table.Users.Email.EQ(String(email)))
 
 	err := stmt.QueryContext(ctx, db, &user)
 	if err != nil {
@@ -27,10 +27,10 @@ func GetUserInto(ctx context.Context, db *sql.DB, uuid string, user *model.Users
 	return nil
 }
 
-func GetUser(ctx context.Context, db *sql.DB, uuid string) (*model.Users, error) {
+func GetUser(ctx context.Context, db *sql.DB, email string) (*model.Users, error) {
 	var user model.Users
 
-	err := GetUserInto(ctx, db, uuid, &user)
+	err := GetUserInto(ctx, db, email, &user)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func GetUser(ctx context.Context, db *sql.DB, uuid string) (*model.Users, error)
 func Authenticate(
 	ctx context.Context,
 	db *sql.DB,
-	username string,
+	email string,
 	password []byte,
 ) (string, error) {
 	stmt := SELECT(
@@ -49,7 +49,7 @@ func Authenticate(
 		table.Users.UUID,
 	).
 		FROM(table.Users).
-		WHERE(table.Users.UserName.EQ(String(username)))
+		WHERE(table.Users.Email.EQ(String(email)))
 
 	var user model.Users
 	err := stmt.QueryContext(ctx, db, &user)

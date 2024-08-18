@@ -1,7 +1,12 @@
 package manager
 
 import (
+	"context"
 	"database/sql"
+
+	"github.com/slainless/mock-fintech-platform/pkg/internal/query"
+	"github.com/slainless/mock-fintech-platform/pkg/platform"
+	"github.com/slainless/mock-fintech-platform/pkg/user"
 )
 
 type UserManager struct {
@@ -14,17 +19,11 @@ func NewUserManager(db *sql.DB) *UserManager {
 	}
 }
 
-// func (m *UserManager) Login(ctx context.Context, service platform.AuthService, credential any) (platform.User, error) {
-// 	uuid, err := service.Authenticate(credential)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+func (m *UserManager) GetUserByEmail(ctx context.Context, email string) (platform.User, error) {
+	model, err := query.GetUser(ctx, m.db, email)
+	if err != nil {
+		return nil, err
+	}
 
-// 	var user User
-// 	err = query.GetUserInto(ctx, m.db, uuid, &user.user)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	return &user, nil
-// }
+	return user.NewUser(model), nil
+}

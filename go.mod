@@ -5,6 +5,7 @@ go 1.21.0
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-jet/jet/v2 v2.11.1
+	github.com/kataras/jwt v0.1.12
 	golang.org/x/crypto v0.26.0
 )
 
