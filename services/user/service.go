@@ -7,7 +7,7 @@ import (
 	"github.com/slainless/mock-fintech-platform/pkg/core"
 )
 
-type UserService struct {
+type Service struct {
 	db *sql.DB
 
 	authManager    *core.AuthManager
