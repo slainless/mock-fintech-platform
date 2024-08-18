@@ -19,8 +19,8 @@ type transactionHistoriesTable struct {
 	// Columns
 	ID              postgres.ColumnInteger
 	UUID            postgres.ColumnString
-	UserUUID        postgres.ColumnString
-	ServiceID       postgres.ColumnString
+	AccountUUID     postgres.ColumnString
+	DestUUID        postgres.ColumnString
 	Mutation        postgres.ColumnInteger
 	Currency        postgres.ColumnString
 	Status          postgres.ColumnInteger
@@ -70,8 +70,8 @@ func newTransactionHistoriesTableImpl(schemaName, tableName, alias string) trans
 	var (
 		IDColumn              = postgres.IntegerColumn("id")
 		UUIDColumn            = postgres.StringColumn("uuid")
-		UserUUIDColumn        = postgres.StringColumn("user_uuid")
-		ServiceIDColumn       = postgres.StringColumn("service_id")
+		AccountUUIDColumn     = postgres.StringColumn("account_uuid")
+		DestUUIDColumn        = postgres.StringColumn("dest_uuid")
 		MutationColumn        = postgres.IntegerColumn("mutation")
 		CurrencyColumn        = postgres.StringColumn("currency")
 		StatusColumn          = postgres.IntegerColumn("status")
@@ -79,8 +79,8 @@ func newTransactionHistoriesTableImpl(schemaName, tableName, alias string) trans
 		TransactionNoteColumn = postgres.StringColumn("transaction_note")
 		TransactionDateColumn = postgres.TimestampColumn("transaction_date")
 		TransactionTypeColumn = postgres.IntegerColumn("transaction_type")
-		allColumns            = postgres.ColumnList{IDColumn, UUIDColumn, UserUUIDColumn, ServiceIDColumn, MutationColumn, CurrencyColumn, StatusColumn, AddressColumn, TransactionNoteColumn, TransactionDateColumn, TransactionTypeColumn}
-		mutableColumns        = postgres.ColumnList{IDColumn, UUIDColumn, UserUUIDColumn, ServiceIDColumn, MutationColumn, CurrencyColumn, StatusColumn, AddressColumn, TransactionNoteColumn, TransactionDateColumn, TransactionTypeColumn}
+		allColumns            = postgres.ColumnList{IDColumn, UUIDColumn, AccountUUIDColumn, DestUUIDColumn, MutationColumn, CurrencyColumn, StatusColumn, AddressColumn, TransactionNoteColumn, TransactionDateColumn, TransactionTypeColumn}
+		mutableColumns        = postgres.ColumnList{IDColumn, UUIDColumn, AccountUUIDColumn, DestUUIDColumn, MutationColumn, CurrencyColumn, StatusColumn, AddressColumn, TransactionNoteColumn, TransactionDateColumn, TransactionTypeColumn}
 	)
 
 	return transactionHistoriesTable{
@@ -89,8 +89,8 @@ func newTransactionHistoriesTableImpl(schemaName, tableName, alias string) trans
 		//Columns
 		ID:              IDColumn,
 		UUID:            UUIDColumn,
-		UserUUID:        UserUUIDColumn,
-		ServiceID:       ServiceIDColumn,
+		AccountUUID:     AccountUUIDColumn,
+		DestUUID:        DestUUIDColumn,
 		Mutation:        MutationColumn,
 		Currency:        CurrencyColumn,
 		Status:          StatusColumn,

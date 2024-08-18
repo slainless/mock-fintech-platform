@@ -14,8 +14,8 @@ import (
 type TransactionHistories struct {
 	ID              int32
 	UUID            string
-	UserUUID        string
-	ServiceID       string
+	AccountUUID     string
+	DestUUID        *string
 	Mutation        int64
 	Currency        string
 	Status          int16
