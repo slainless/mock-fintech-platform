@@ -1,5 +1,6 @@
-# Take home assignment
+# Mock Fintech Platform
 
+[Database Plan](https://dbdiagram.io/d/Mock-Fintech-Platform-Diagram-66c147db8b4bb5230e626228).
 
 ## Description:
 Build 2 Backend services which manages user’s accounts and transactions (send/withdraw). 
