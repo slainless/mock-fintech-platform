@@ -10,8 +10,8 @@ type Platform interface {
 	// history manager
 	HistoryManager() TransactionHistoryManager
 
-	// mutation manager
-	MutationManager() TransactionMutationManager
+	// monetary account manager
+	AccountManager() MonetaryAccountManager
 
 	// user manager
 	UserManager() UserManager
@@ -19,6 +19,6 @@ type Platform interface {
 	// money exchange manager
 	MoneyExchangeManager() MoneyExchangeManager
 
-	// recurrent transaction manager
-	RecurrentTransactionManager() RecurrentTransactionManager
+	// recurrent payment manager
+	RecurrentPaymentManager() RecurrentPaymentManager
 }

@@ -1,8 +1,10 @@
 package platform
 
-type UserManager interface {
-	Login(service AuthService, credential any) (User, error)
+import "context"
 
-	Logout(service AuthService, user User) error
-	LogoutByID(service AuthService, userID string) error
+type UserManager interface {
+	Login(ctx context.Context, service AuthService, credential any) (User, error)
+
+	Logout(ctx context.Context, service AuthService, user User) error
+	LogoutByID(ctx context.Context, service AuthService, userID string) error
 }
