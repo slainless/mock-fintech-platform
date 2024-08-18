@@ -1,6 +1,6 @@
 package platform
 
-type PaymentAccount interface {
+type MonetaryAccount interface {
 	ID() string
 
 	Currency() Currency

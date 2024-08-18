@@ -1,5 +1,5 @@
 package platform
 
 type AuthService interface {
-	Authenticate(credential any) (userID string, err error)
+	Authenticate(credential any) (userUUID string, err error)
 }

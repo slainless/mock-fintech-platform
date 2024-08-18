@@ -1,7 +1,8 @@
 package platform
 
 type User interface {
+	// should returns UUID of user
 	ID() string
 
-	PaymentAccounts() map[string]PaymentAccount
+	MonetaryAccounts() map[string]MonetaryAccount
 }

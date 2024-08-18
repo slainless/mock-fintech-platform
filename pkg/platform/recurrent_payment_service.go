@@ -1,6 +1,6 @@
 package platform
 
-type RecurrentBillingService interface {
+type RecurrentPaymentService interface {
 	ID() string
 
 	// Charging callback. This should be called
