@@ -29,8 +29,15 @@ func (m *TransactionHistoryManager) GetHistories(ctx context.Context, user *plat
 	return histories, nil
 }
 
+// TODO: Fix this brahh
 func (m *TransactionHistoryManager) GetRange(ctx *gin.Context) (*time.Time, *time.Time, error) {
+	from, err := time.Parse(time.DateTime, "1998-01-01")
+	if err != nil {
+		return nil, nil, err
+	}
 
+	to := time.Now()
+	return &from, &to, nil
 }
 
 func (m *TransactionHistoryManager) Records(ctx context.Context, histories []platform.TransactionHistory) error {
