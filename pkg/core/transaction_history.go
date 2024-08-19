@@ -20,24 +20,35 @@ func NewTransactionHistoryManager(db *sql.DB) *TransactionHistoryManager {
 	}
 }
 
-func (m *TransactionHistoryManager) GetHistories(ctx context.Context, user *platform.User, from, to time.Time) ([]platform.TransactionHistory, error) {
-	histories, err := query.GetHistories(ctx, m.db, user.UUID, from, to)
-	if err != nil {
-		return nil, err
+func (m *TransactionHistoryManager) GetHistories(ctx context.Context, user *platform.User, accountUUID string, from, to time.Time) ([]platform.TransactionHistory, error) {
+	if accountUUID != "" {
+		return query.GetHistoriesOfAccount(ctx, m.db, accountUUID, from, to)
+	} else {
+		return query.GetHistories(ctx, m.db, user.UUID, from, to)
 	}
+}
 
-	return histories, nil
+type DateRange struct {
+	From      *time.Time `form:"from" time_format:"2006-01-02"`
+	To        *time.Time `form:"to" time_format:"2006-01-02"`
+	AccountID string     `form:"account_id"`
 }
 
 // TODO: Fix this brahh
-func (m *TransactionHistoryManager) GetRange(ctx *gin.Context) (*time.Time, *time.Time, error) {
-	from, err := time.Parse(time.DateTime, "1998-01-01")
-	if err != nil {
-		return nil, nil, err
+func (m *TransactionHistoryManager) GetHistoryParams(ctx *gin.Context) (*time.Time, *time.Time, string) {
+	var rg DateRange
+	ctx.BindQuery(&rg)
+
+	if rg.From == nil {
+		rg.From = &time.Time{}
 	}
 
-	to := time.Now()
-	return &from, &to, nil
+	if rg.To == nil {
+		date := time.Now()
+		rg.To = &date
+	}
+
+	return rg.From, rg.To, rg.AccountID
 }
 
 func (m *TransactionHistoryManager) Records(ctx context.Context, histories []platform.TransactionHistory) error {

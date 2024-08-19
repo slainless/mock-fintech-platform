@@ -8,18 +8,14 @@ func (s *Service) histories() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := s.authManager.GetUser(c)
 
-		from, to, err := s.historyManager.GetRange(c)
+		from, to, accountUUID := s.historyManager.GetHistoryParams(c)
+		histories, err := s.historyManager.GetHistories(c, user, accountUUID, *from, *to)
 		if err != nil {
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			c.String(500, "Failed to get histories")
+			s.errorTracker.Report(c, err)
 			return
 		}
 
-		histories, err := s.historyManager.GetHistories(c, user, *from, *to)
-		if err != nil {
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
-			return
-		}
-
-		c.JSON(200, histories)
+		c.JSON(200, gin.H{"histories": histories})
 	}
 }

@@ -31,7 +31,7 @@ func GetHistoriesOfAccount(ctx context.Context, db *sql.DB, accountUUID string, 
 				AND(table.TransactionHistories.TransactionDate.LT_EQ(TimestampT(to))),
 		)
 
-	var histories []platform.TransactionHistory
+	histories := make([]platform.TransactionHistory, 0)
 	err := stmt.QueryContext(ctx, db, &histories)
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func GetHistories(ctx context.Context, db *sql.DB, userUUID string, from, to tim
 				AND(table.TransactionHistories.TransactionDate.LT_EQ(TimestampT(to))),
 		)
 
-	var histories []platform.TransactionHistory
+	histories := make([]platform.TransactionHistory, 0)
 	err := stmt.QueryContext(ctx, db, &histories)
 	if err != nil {
 		return nil, err
