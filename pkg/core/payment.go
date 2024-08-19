@@ -44,7 +44,7 @@ func (m *PaymentManager) Send(ctx context.Context, from, to *platform.PaymentAcc
 	if err != nil {
 		m.errorTracker.Report(ctx, err)
 		destHistory = m.historyManager.CreateMakeshiftMatchingTransferHistory(ctx, sourceHistory, fmt.Sprintf("Transfer from %s", from.UUID))
-		return nil, err
+		// return nil, err
 	}
 
 	m.errorTracker.Report(ctx,

@@ -72,7 +72,15 @@ func (m *PaymentAccountManager) PrepareTransfer(ctx context.Context, fromUUID, t
 }
 
 func (m *PaymentAccountManager) CheckOwner(ctx context.Context, user *platform.User, accountUUID string) error {
-	return query.CheckOwner(ctx, m.db, user.UUID, accountUUID)
+	err := query.CheckOwner(ctx, m.db, user.UUID, accountUUID)
+	if err != nil {
+		if err == qrm.ErrNoRows {
+			return ErrAccountNotFound
+		}
+		return err
+	}
+
+	return nil
 }
 
 func (m *PaymentAccountManager) GetBalance(ctx context.Context, account *platform.PaymentAccount) (*platform.MonetaryAmount, error) {

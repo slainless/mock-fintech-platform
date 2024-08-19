@@ -2,6 +2,7 @@ package payment
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/slainless/mock-fintech-platform/pkg/core"
 )
 
 type Send struct {
@@ -15,26 +16,45 @@ func (s *Service) send() gin.HandlerFunc {
 		user := s.authManager.GetUser(c)
 
 		var send Send
-		err := c.Bind(&send)
+		err := c.ShouldBind(&send)
 		if err != nil {
+			c.String(400, err.Error())
 			return
 		}
 
 		err = s.accountManager.CheckOwner(c, user, send.AccountUUID)
 		if err != nil {
-			c.AbortWithStatusJSON(401, gin.H{"error": err.Error()})
+			switch err {
+			case core.ErrAccountNotFound:
+				c.String(400, err.Error())
+			default:
+				c.String(500, "Failed to check account")
+				s.errorTracker.Report(c, err)
+			}
 			return
 		}
 
 		from, to, err := s.accountManager.PrepareTransfer(c, send.AccountUUID, send.DestUUID)
 		if err != nil {
-			c.AbortWithStatusJSON(401, gin.H{"error": err.Error()})
+			switch err {
+			case core.ErrAccountNotFound, core.ErrInvalidTransferDestination:
+				c.String(400, err.Error())
+			default:
+				c.String(500, "Failed to prepare transfer")
+				s.errorTracker.Report(c, err)
+			}
 			return
 		}
 
 		history, err := s.paymentManager.Send(c, from, to, send.Amount)
 		if err != nil {
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			switch err {
+			case core.ErrPaymentServiceNotSupported:
+				c.String(501, err.Error())
+			default:
+				c.String(500, "Failed to send")
+				s.errorTracker.Report(c, err)
+			}
 			return
 		}
 
