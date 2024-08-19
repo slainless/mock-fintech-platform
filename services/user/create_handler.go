@@ -29,13 +29,13 @@ func (s *Service) create() gin.HandlerFunc {
 		account, err := s.accountManager.Register(c, user, create.ServiceID, create.Name, create.AccountID, create.CallbackData)
 		if err != nil {
 			switch {
-			case
-				errors.Is(err, core.ErrPaymentServiceNotSupported),
-				errors.Is(err, platform.ErrInvalidAccountData):
+			case errors.Is(err, platform.ErrInvalidAccountData):
 				// errors.Is(err, platform.ErrTransactionRejected):
 				c.String(400, err.Error())
 			case err == core.ErrAccountAlreadyRegistered:
 				c.String(409, err.Error())
+			case errors.Is(err, core.ErrPaymentServiceNotSupported):
+				c.String(501, err.Error())
 			default:
 				s.errorTracker.Report(c, err)
 				c.String(500, "Failed to register account")
@@ -50,6 +50,6 @@ func (s *Service) create() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(200, gin.H{"account": account, "balance": balance})
+		c.JSON(201, gin.H{"account": account, "balance": balance})
 	}
 }

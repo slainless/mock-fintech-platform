@@ -36,6 +36,6 @@ func (s *Service) registerWithEmail() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(200, gin.H{"status": "ok"})
+		c.JSON(201, gin.H{"status": "ok"})
 	}
 }

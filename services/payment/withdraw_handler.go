@@ -1,7 +1,10 @@
 package payment
 
 import (
+	"errors"
+
 	"github.com/gin-gonic/gin"
+	"github.com/slainless/mock-fintech-platform/pkg/core"
 )
 
 type Withdraw struct {
@@ -15,28 +18,41 @@ func (s *Service) withdraw() gin.HandlerFunc {
 		user := s.authManager.GetUser(c)
 
 		var withdraw Withdraw
-		err := c.Bind(&withdraw)
+		err := c.ShouldBind(&withdraw)
 		if err != nil {
+			c.String(400, err.Error())
 			return
 		}
 
 		account, err := s.accountManager.GetAccount(c, withdraw.AccountUUID)
 		if err != nil {
-			c.AbortWithStatusJSON(401, gin.H{"error": err.Error()})
+			switch {
+			case errors.Is(err, core.ErrAccountNotFound):
+				c.String(400, err.Error())
+			default:
+				s.errorTracker.Report(c, err)
+				c.String(500, "Failed to get account")
+			}
 			return
 		}
 
 		if account.UserUUID != user.UUID {
-			c.AbortWithStatusJSON(401, gin.H{"error": "invalid account"})
+			c.String(400, core.ErrAccountNotFound.Error())
 			return
 		}
 
 		history, err := s.paymentManager.Withdraw(c, account, withdraw.Amount, withdraw.CallbackData)
 		if err != nil {
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			switch {
+			case errors.Is(err, core.ErrPaymentServiceNotSupported):
+				c.String(501, err.Error())
+			default:
+				c.String(500, "Failed to withdraw")
+				s.errorTracker.Report(c, err)
+			}
 			return
 		}
 
-		c.JSON(200, history)
+		c.JSON(200, gin.H{"history": history})
 	}
 }
