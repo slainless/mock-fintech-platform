@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/slainless/mock-fintech-platform/internal/util"
-	"github.com/slainless/mock-fintech-platform/pkg/platform"
+	"github.com/slainless/mock-fintech-platform/pkg/payment_service"
 	"github.com/slainless/mock-fintech-platform/pkg/tracker"
 	"github.com/slainless/mock-fintech-platform/services/payment"
 	"github.com/urfave/cli/v2"
@@ -16,7 +16,8 @@ func action(ctx *cli.Context) error {
 	}
 
 	tracker := &tracker.LogTracker{}
-	service := payment.NewService(flagAuthSecret, db, map[string]platform.PaymentService{}, tracker)
+	paymentServices := payment_service.InitiatePaymentServices()
+	service := payment.NewService(flagAuthSecret, db, paymentServices, tracker)
 
 	app := gin.Default()
 	service.Mount(app)
