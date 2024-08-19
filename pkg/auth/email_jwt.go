@@ -5,11 +5,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kataras/jwt"
-	"github.com/slainless/mock-fintech-platform/internal/util"
+	"github.com/golang-jwt/jwt/v5"
 )
-
-var headerValidator = util.NewHeaderValidator("HS256", "JWT")
 
 type EmailJWTAuthService struct {
 	secret []byte
@@ -41,6 +38,11 @@ func (*EmailJWTAuthService) ServiceID() string {
 	return "supabase_jwt"
 }
 
+type Claims struct {
+	jwt.RegisteredClaims
+	Email string `json:"email"`
+}
+
 // Validate implements platform.AuthService.
 func (s *EmailJWTAuthService) Validate(ctx context.Context, credential any) (email string, err error) {
 	v, ok := credential.(string)
@@ -48,18 +50,20 @@ func (s *EmailJWTAuthService) Validate(ctx context.Context, credential any) (ema
 		return "", ErrInvalidCredential
 	}
 
-	token, err := jwt.VerifyWithHeaderValidator(jwt.HS256, s.secret, []byte(v), headerValidator)
+	t, err := jwt.ParseWithClaims(v, &Claims{}, func(token *jwt.Token) (any, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, ErrUnsupportedHeader
+		}
+		return s.secret, nil
+	})
 	if err != nil {
-		return "", err
+		return "", nil
 	}
 
-	var c struct {
-		Email string `json:"email"`
-	}
-	err = token.Claims(&c)
-	if err != nil {
-		return "", err
+	claim, ok := t.Claims.(*Claims)
+	if !ok {
+		return "", ErrInvalidCredential
 	}
 
-	return c.Email, nil
+	return claim.Email, nil
 }
