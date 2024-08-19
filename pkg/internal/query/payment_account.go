@@ -51,6 +51,13 @@ func GetTwoAccounts(ctx context.Context, db *sql.DB, FirstUUID, SecondUUID strin
 		return nil, nil, err
 	}
 
+	if len(accounts) == 1 {
+		if accounts[0].UUID == FirstUUID {
+			return &accounts[0], nil, nil
+		}
+		return nil, &accounts[0], nil
+	}
+
 	var first, second *platform.PaymentAccount
 	if accounts[0].UUID == FirstUUID {
 		first = &accounts[0]
@@ -64,14 +71,16 @@ func GetTwoAccounts(ctx context.Context, db *sql.DB, FirstUUID, SecondUUID strin
 }
 
 func CheckOwner(ctx context.Context, db *sql.DB, userUUID, accountUUID string) error {
-	stmt := SELECT(Bool(true)).
+	stmt := SELECT(Bool(true).AS("exists")).
 		FROM(table.PaymentAccounts).
 		WHERE(
 			table.PaymentAccounts.UUID.EQ(String(accountUUID)).
 				AND(table.PaymentAccounts.UserUUID.EQ(String(userUUID))),
 		)
 
-	var exists bool
+	var exists struct {
+		exists bool
+	}
 	err := stmt.QueryContext(ctx, db, &exists)
 	if err != nil {
 		return err
