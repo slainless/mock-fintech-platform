@@ -2,10 +2,14 @@ package auth
 
 import (
 	"context"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kataras/jwt"
+	"github.com/slainless/mock-fintech-platform/internal/util"
 )
+
+var headerValidator = util.NewHeaderValidator("HS256", "JWT")
 
 type EmailJWTAuthService struct {
 	secret []byte
@@ -24,7 +28,12 @@ func (*EmailJWTAuthService) Credential(ctx *gin.Context) (any, error) {
 		return nil, ErrEmptyCredential
 	}
 
-	return token, nil
+	if strings.HasPrefix(token, "Bearer ") {
+		token = strings.TrimPrefix(token, "Bearer ")
+		return token, nil
+	} else {
+		return nil, ErrUnsupportedCredential
+	}
 }
 
 // ServiceID implements platform.AuthService.
@@ -39,7 +48,7 @@ func (s *EmailJWTAuthService) Validate(ctx context.Context, credential any) (ema
 		return "", ErrInvalidCredential
 	}
 
-	token, err := jwt.Verify(jwt.HS256, s.secret, []byte(v))
+	token, err := jwt.VerifyWithHeaderValidator(jwt.HS256, s.secret, []byte(v), headerValidator)
 	if err != nil {
 		return "", err
 	}
