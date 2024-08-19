@@ -3,7 +3,6 @@ package core
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
@@ -43,15 +42,15 @@ func (m *PaymentManager) Send(ctx context.Context, from, to *platform.PaymentAcc
 	destHistory, err = service.GetMatchingHistory(ctx, to, sourceHistory)
 	if err != nil {
 		m.errorTracker.Report(ctx, err)
-		destHistory = m.historyManager.CreateMakeshiftMatchingTransferHistory(ctx, sourceHistory, fmt.Sprintf("Transfer from %s", from.UUID))
-		// return nil, err
+		m.errorTracker.Report(ctx,
+			m.historyManager.Records(ctx, []platform.TransactionHistory{*sourceHistory}))
+	} else {
+		m.errorTracker.Report(ctx,
+			m.historyManager.Records(ctx, []platform.TransactionHistory{
+				*sourceHistory,
+				*destHistory,
+			}))
 	}
-
-	m.errorTracker.Report(ctx,
-		m.historyManager.Records(ctx, []platform.TransactionHistory{
-			*sourceHistory,
-			*destHistory,
-		}))
 
 	return sourceHistory, nil
 }

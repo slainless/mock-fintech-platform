@@ -9,11 +9,3 @@ type TransactionHistory struct {
 	ServiceUUID string
 	UserUUID    string
 }
-
-func (t *TransactionHistory) Clone() TransactionHistory {
-	return TransactionHistory{
-		TransactionHistories: t.TransactionHistories,
-		ServiceUUID:          t.ServiceUUID,
-		UserUUID:             t.UserUUID,
-	}
-}

@@ -59,13 +59,3 @@ func (m *TransactionHistoryManager) Records(ctx context.Context, histories []pla
 
 	return nil
 }
-
-func (m *TransactionHistoryManager) CreateMakeshiftMatchingTransferHistory(ctx context.Context, history *platform.TransactionHistory, note string) *platform.TransactionHistory {
-	match := *history
-	match.TransactionNote = &note
-	match.AccountUUID = *history.DestUUID
-	match.Mutation = history.Mutation * -1
-	match.Address = nil
-
-	return &match
-}
