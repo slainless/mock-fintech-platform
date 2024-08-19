@@ -2,6 +2,12 @@ package platform
 
 import (
 	"context"
+	"errors"
+)
+
+var (
+	ErrInvalidAccountData  = errors.New("invalid account data")
+	ErrTransactionRejected = errors.New("transaction rejected")
 )
 
 type PaymentService interface {

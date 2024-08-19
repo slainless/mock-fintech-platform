@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
+	"github.com/slainless/mock-fintech-platform/internal/util"
 	"github.com/slainless/mock-fintech-platform/pkg/internal/artifact/database/mock_fintech/public/model"
 	"github.com/slainless/mock-fintech-platform/pkg/internal/query"
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
@@ -13,6 +14,7 @@ import (
 
 var ErrInvalidTransferDestination = errors.New("invalid transfer destination")
 var ErrInvalidAccount = errors.New("invalid account")
+var ErrAccountAlreadyRegistered = errors.New("account already registered")
 
 type PaymentAccountManager struct {
 	services     map[string]platform.PaymentService
@@ -105,6 +107,12 @@ func (m *PaymentAccountManager) Register(ctx context.Context, user *platform.Use
 	}
 	err = query.InsertAccount(ctx, m.db, account)
 	if err != nil {
+		if err := util.PQErrorCode(err); err != "" {
+			switch err {
+			case "unique_violation":
+				return nil, ErrAccountAlreadyRegistered
+			}
+		}
 		m.errorTracker.Report(ctx, err)
 		return nil, err
 	}

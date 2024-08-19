@@ -1,6 +1,12 @@
 package user
 
-import "github.com/gin-gonic/gin"
+import (
+	"errors"
+
+	"github.com/gin-gonic/gin"
+	"github.com/slainless/mock-fintech-platform/pkg/core"
+	"github.com/slainless/mock-fintech-platform/pkg/platform"
+)
 
 type Create struct {
 	AccountID    string `json:"account_id" form:"account_id" binding:"required"`
@@ -14,21 +20,33 @@ func (s *Service) create() gin.HandlerFunc {
 		user := s.authManager.GetUser(c)
 
 		var create Create
-		err := c.Bind(&create)
+		err := c.ShouldBind(&create)
 		if err != nil {
+			c.String(400, err.Error())
 			return
 		}
 
-		account, err := s.accountManager.Register(c, user, create.AccountID, create.ServiceID, create.Name, create.CallbackData)
+		account, err := s.accountManager.Register(c, user, create.ServiceID, create.Name, create.AccountID, create.CallbackData)
 		if err != nil {
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			switch {
+			case
+				errors.Is(err, core.ErrPaymentServiceNotSupported),
+				errors.Is(err, platform.ErrInvalidAccountData):
+				// errors.Is(err, platform.ErrTransactionRejected):
+				c.String(400, err.Error())
+			case err == core.ErrAccountAlreadyRegistered:
+				c.String(409, err.Error())
+			default:
+				s.errorTracker.Report(c, err)
+				c.String(500, "Failed to register account")
+			}
 			return
 		}
 
 		balance, err := s.accountManager.GetBalance(c, account)
 		if err != nil {
 			s.errorTracker.Report(c, err)
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			// c.String(500, "Failed to get account balance post-registration\nBut, don't worry, your account is successfully created")
 			return
 		}
 

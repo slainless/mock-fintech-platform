@@ -84,7 +84,7 @@ func InsertAccount(ctx context.Context, db *sql.DB, account *platform.PaymentAcc
 	stmt := table.PaymentAccounts.INSERT(
 		table.PaymentAccounts.AllColumns.Except(table.PaymentAccounts.ID),
 	).
-		VALUES(account)
+		MODEL(account)
 
 	_, err := stmt.ExecContext(ctx, db)
 	if err != nil {
