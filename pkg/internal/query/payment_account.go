@@ -14,7 +14,7 @@ func GetAllAccounts(ctx context.Context, db *sql.DB, userUUID string) ([]platfor
 		FROM(table.PaymentAccounts).
 		WHERE(table.PaymentAccounts.UserUUID.EQ(String(userUUID)))
 
-	var accounts []platform.PaymentAccount
+	accounts := make([]platform.PaymentAccount, 0)
 	err := stmt.QueryContext(ctx, db, &accounts)
 	if err != nil {
 		return nil, err

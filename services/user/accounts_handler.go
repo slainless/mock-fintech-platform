@@ -10,10 +10,11 @@ func (s *Service) accounts() gin.HandlerFunc {
 
 		accounts, err := s.accountManager.GetAccounts(c, user)
 		if err != nil {
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			c.String(500, "Failed to load user accounts")
+			s.errorTracker.Report(c, err)
 			return
 		}
 
-		c.JSON(200, accounts)
+		c.JSON(200, gin.H{"accounts": accounts})
 	}
 }
