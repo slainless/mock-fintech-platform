@@ -6,8 +6,8 @@ import (
 )
 
 type Send struct {
-	AccountUUID string `json:"account" form:"account" binding:"required,uuid"`
-	DestUUID    string `json:"dest" form:"dest" binding:"required,uuid"`
+	AccountUUID string `json:"account" form:"account_id" binding:"required,uuid"`
+	DestUUID    string `json:"dest" form:"dest_id" binding:"required,uuid"`
 	Amount      int64  `json:"amount" form:"amount" binding:"required,max=9223372036854775807,min=-9223372036854775808"`
 }
 
@@ -19,6 +19,11 @@ func (s *Service) send() gin.HandlerFunc {
 		err := c.ShouldBind(&send)
 		if err != nil {
 			c.String(400, err.Error())
+			return
+		}
+
+		if send.AccountUUID == send.DestUUID {
+			c.String(400, core.ErrInvalidTransferDestination.Error()+"\nUnable to send to the same account!")
 			return
 		}
 
