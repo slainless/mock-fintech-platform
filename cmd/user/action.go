@@ -16,7 +16,7 @@ func action(ctx *cli.Context) error {
 		return err
 	}
 
-	tracker := &tracker.NilTracker{}
+	tracker := &tracker.LogTracker{}
 	mockService := payment_service.NewMockPaymentService()
 	service := user.NewService(flagAuthSecret, db,
 		map[string]platform.PaymentService{

@@ -15,7 +15,7 @@ func action(ctx *cli.Context) error {
 		return err
 	}
 
-	tracker := &tracker.NilTracker{}
+	tracker := &tracker.LogTracker{}
 	service := payment.NewService(flagAuthSecret, db, map[string]platform.PaymentService{}, tracker)
 
 	app := gin.Default()
