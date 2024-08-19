@@ -37,7 +37,7 @@ type DateRange struct {
 // TODO: Fix this brahh
 func (m *TransactionHistoryManager) GetHistoryParams(ctx *gin.Context) (*time.Time, *time.Time, string) {
 	var rg DateRange
-	ctx.BindQuery(&rg)
+	ctx.ShouldBindQuery(&rg)
 
 	if rg.From == nil {
 		rg.From = &time.Time{}
