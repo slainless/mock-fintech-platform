@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/go-jet/jet/v2/qrm"
 	"github.com/google/uuid"
 	"github.com/slainless/mock-fintech-platform/internal/util"
 	"github.com/slainless/mock-fintech-platform/pkg/internal/artifact/database/mock_fintech/public/model"
@@ -13,7 +14,7 @@ import (
 )
 
 var ErrInvalidTransferDestination = errors.New("invalid transfer destination")
-var ErrInvalidAccount = errors.New("invalid account")
+var ErrAccountNotFound = errors.New("account not found")
 var ErrAccountAlreadyRegistered = errors.New("account already registered")
 
 type PaymentAccountManager struct {
@@ -44,6 +45,9 @@ func (m *PaymentAccountManager) GetAccounts(ctx context.Context, user *platform.
 func (m *PaymentAccountManager) GetAccount(ctx context.Context, accountUUID string) (*platform.PaymentAccount, error) {
 	account, err := query.GetAccount(ctx, m.db, accountUUID)
 	if err != nil {
+		if err == qrm.ErrNoRows {
+			return nil, ErrAccountNotFound
+		}
 		return nil, err
 	}
 
@@ -57,7 +61,7 @@ func (m *PaymentAccountManager) PrepareTransfer(ctx context.Context, fromUUID, t
 	}
 
 	if from == nil {
-		return nil, nil, ErrInvalidAccount
+		return nil, nil, ErrAccountNotFound
 	}
 
 	if to == nil {

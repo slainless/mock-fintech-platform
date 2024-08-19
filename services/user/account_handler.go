@@ -1,24 +1,37 @@
 package user
 
-import "github.com/gin-gonic/gin"
+import (
+	"errors"
+
+	"github.com/gin-gonic/gin"
+	"github.com/slainless/mock-fintech-platform/pkg/core"
+)
 
 func (s *Service) account() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := s.authManager.GetUser(c)
 		account, err := s.accountManager.GetAccount(c, c.Param("uuid"))
 		if err != nil {
-			c.AbortWithStatusJSON(404, gin.H{"error": err.Error()})
+			switch {
+			case errors.Is(err, core.ErrAccountNotFound):
+				c.String(404, err.Error())
+			default:
+				c.String(500, "Failed to get account")
+				s.errorTracker.Report(c, err)
+			}
 			return
 		}
 
 		if account.UserUUID != user.UUID {
-			c.AbortWithStatusJSON(401, gin.H{"error": "invalid account"})
+			c.String(404, core.ErrAccountNotFound.Error())
+			// c.String(403, "Forbidden")
 			return
 		}
 
 		balance, err := s.accountManager.GetBalance(c, account)
 		if err != nil {
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			c.String(500, "Failed to get account")
+			s.errorTracker.Report(c, err)
 			return
 		}
 
