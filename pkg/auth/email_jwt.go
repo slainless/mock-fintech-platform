@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -57,7 +58,7 @@ func (s *EmailJWTAuthService) Validate(ctx context.Context, credential any) (ema
 		return s.secret, nil
 	})
 	if err != nil {
-		return "", nil
+		return "", errors.Join(err, ErrInvalidCredential)
 	}
 
 	claim, ok := t.Claims.(*Claims)

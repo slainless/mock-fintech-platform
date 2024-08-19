@@ -21,7 +21,7 @@ func GetUserInto(ctx context.Context, db *sql.DB, email string, user *platform.U
 		FROM(table.Users).
 		WHERE(table.Users.Email.EQ(String(email)))
 
-	err := stmt.QueryContext(ctx, db, &user)
+	err := stmt.QueryContext(ctx, db, user)
 	if err != nil {
 		return err
 	}

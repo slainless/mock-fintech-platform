@@ -2,9 +2,15 @@ package core
 
 import (
 	"context"
+	"errors"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-jet/jet/v2/qrm"
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
+)
+
+var (
+	ErrUserNotRegistered = errors.New("user not registered")
 )
 
 type AuthManager struct {
@@ -23,7 +29,15 @@ func (m *AuthManager) Validate(ctx context.Context, service platform.AuthService
 		return nil, err
 	}
 
-	return m.UserManager.GetUserByEmail(ctx, email)
+	user, err := m.UserManager.GetUserByEmail(ctx, email)
+	if err != nil {
+		if err == qrm.ErrNoRows {
+			return nil, ErrUserNotRegistered
+		}
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (m *AuthManager) Middleware(service platform.AuthService) gin.HandlerFunc {
@@ -36,7 +50,15 @@ func (m *AuthManager) Middleware(service platform.AuthService) gin.HandlerFunc {
 
 		user, err := m.Validate(c, service, credential)
 		if err != nil {
-			c.AbortWithStatusJSON(401, gin.H{"error": err.Error()})
+			switch err {
+			case ErrUserNotRegistered:
+				c.AbortWithStatusJSON(401, gin.H{
+					"error": err.Error(),
+					"note":  "Please register your account first at /register.",
+				})
+			default:
+				c.AbortWithStatusJSON(401, gin.H{"error": err.Error()})
+			}
 			return
 		}
 
