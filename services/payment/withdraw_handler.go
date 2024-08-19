@@ -8,8 +8,8 @@ import (
 )
 
 type Withdraw struct {
-	AccountUUID  string `json:"account" form:"account" binding:"required,uuid"`
-	Amount       int64  `json:"amount" form:"amount" binding:"required,max=9223372036854775807,min=-9223372036854775808"`
+	AccountUUID  string `json:"account_id" form:"account_id" binding:"required,uuid"`
+	Amount       int64  `json:"amount" form:"amount" binding:"required"`
 	CallbackData string `json:"callback" form:"callback" binding:"required"`
 }
 

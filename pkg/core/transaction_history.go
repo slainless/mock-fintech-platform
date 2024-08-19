@@ -31,7 +31,7 @@ func (m *TransactionHistoryManager) GetHistories(ctx context.Context, user *plat
 type DateRange struct {
 	From      *time.Time `form:"from" time_format:"2006-01-02"`
 	To        *time.Time `form:"to" time_format:"2006-01-02"`
-	AccountID string     `form:"account_id"`
+	AccountID string     `form:"account_id" binding:"uuid"`
 }
 
 // TODO: Fix this brahh

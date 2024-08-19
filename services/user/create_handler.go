@@ -9,6 +9,7 @@ import (
 )
 
 type Create struct {
+	// foreign account id, different from internal account UUID.
 	AccountID    string `json:"account_id" form:"account_id" binding:"required"`
 	ServiceID    string `json:"service_id" form:"service_id" binding:"required"`
 	Name         string `json:"name" form:"name" binding:""`
