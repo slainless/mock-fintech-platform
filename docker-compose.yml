@@ -15,6 +15,12 @@ services:
       - ./.data/pgadmin:/var/lib/pgadmin
     ports:
       - 7777:80
+  migration:
+    build:
+      context: .
+    command: migrate -database ${POSTGRESQL_URL} -path db/migrations up
+    env_file:
+      - ./.env
   user:
     build:
       context: .
@@ -25,6 +31,7 @@ services:
       - 8080:8080
     depends_on:
       - postgres
+      - migration
   payment:
     build:
       context: .
@@ -35,3 +42,4 @@ services:
       - 8081:8081
     depends_on:
       - postgres
+      - migration

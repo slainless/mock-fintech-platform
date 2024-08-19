@@ -12,6 +12,10 @@ RUN go generate ./...
 FROM builder AS delve
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
+# install migrate
+FROM builder AS migrate
+RUN ./scripts/install_bin_migrate.sh
+
 # install user
 FROM builder AS user
 RUN go build -o ./bin/user ./cmd/user
@@ -28,7 +32,9 @@ ENTRYPOINT ["dlv", "debug", "--headless", "--api-version=2", "--accept-multiclie
 
 # prod
 FROM golang:latest AS production
-WORKDIR /usr/local/bin
-COPY --from=user /app/bin/user .
-COPY --from=payment /app/bin/payment .
+WORKDIR /app
+COPY --from=builder /app/db/migrations /app/db/migrations
+COPY --from=migrate /app/bin/migrate/migrate /usr/local/bin
+COPY --from=user /app/bin/user /usr/local/bin
+COPY --from=payment /app/bin/payment /usr/local/bin
 CMD ["echo", "Try user or payment."]
