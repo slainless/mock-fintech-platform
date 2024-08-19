@@ -79,7 +79,7 @@ func (*MockPaymentService) Validate(ctx context.Context, user *platform.User, ac
 func (*MockPaymentService) Withdraw(ctx context.Context, account *platform.PaymentAccount, amount int64, callbackData string) (*platform.TransactionHistory, error) {
 	util.MockSleep(2 * time.Second)
 	if util.LeaveItToRNG() {
-		return nil, errors.New("Failed to send money")
+		return nil, errors.New("Failed to withdraw money")
 	} else {
 		uuid, err := uuid.NewV7()
 		if err != nil {

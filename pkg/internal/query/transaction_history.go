@@ -61,25 +61,8 @@ func InsertHistories(ctx context.Context, db *sql.DB, histories []platform.Trans
 	stmt := table.TransactionHistories.INSERT(
 		table.TransactionHistories.AllColumns.Except(table.TransactionHistories.ID),
 	).
-		VALUES(histories)
+		MODELS(histories)
 
 	_, err := stmt.ExecContext(ctx, db)
 	return err
 }
-
-// func GetUserHistories(
-// 	ctx context.Context,
-// 	db *sql.DB,
-// 	userUuid string,
-// 	from, to time.Time,
-// ) ([]TransactionHistoryModel, error) {
-// }
-
-// func GetHistory(
-// 	ctx context.Context,
-// 	db *sql.DB,
-// 	historyUuid string,
-// ) (*TransactionHistoryModel, error) {
-// }
-
-// func InsertHistory(ctx context.Context, db *sql.DB, history *TransactionHistoryModel) error {}
