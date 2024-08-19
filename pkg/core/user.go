@@ -3,10 +3,14 @@ package core
 import (
 	"context"
 	"database/sql"
+	"errors"
 
+	"github.com/slainless/mock-fintech-platform/internal/util"
 	"github.com/slainless/mock-fintech-platform/pkg/internal/query"
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
+
+var ErrUserAlreadyRegistered = errors.New("user already registered")
 
 type UserManager struct {
 	db *sql.DB
@@ -28,5 +32,17 @@ func (m *UserManager) GetUserByEmail(ctx context.Context, email string) (*platfo
 }
 
 func (m *UserManager) Register(ctx context.Context, email string) error {
-	return query.InsertFreshUser(ctx, m.db, email)
+	err := query.InsertFreshUser(ctx, m.db, email)
+	if err != nil {
+		if err := util.PQErrorCode(err); err != "" {
+			switch err {
+			case "unique_violation":
+				return ErrUserAlreadyRegistered
+			}
+		}
+
+		return err
+	}
+
+	return nil
 }

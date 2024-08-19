@@ -44,7 +44,8 @@ func (m *AuthManager) Middleware(service platform.AuthService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		credential, err := service.Credential(c)
 		if err != nil {
-			c.AbortWithStatusJSON(401, gin.H{"error": err.Error()})
+			c.String(401, err.Error())
+			c.Abort()
 			return
 		}
 
@@ -52,13 +53,11 @@ func (m *AuthManager) Middleware(service platform.AuthService) gin.HandlerFunc {
 		if err != nil {
 			switch err {
 			case ErrUserNotRegistered:
-				c.AbortWithStatusJSON(401, gin.H{
-					"error": err.Error(),
-					"note":  "Please register your account first at /register.",
-				})
+				c.String(401, err.Error()+"\nPlease register your account first at /register.")
 			default:
-				c.AbortWithStatusJSON(401, gin.H{"error": err.Error()})
+				c.String(401, err.Error())
 			}
+			c.Abort()
 			return
 		}
 
