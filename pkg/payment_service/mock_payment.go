@@ -38,6 +38,7 @@ func (*MockPaymentService) GetMatchingHistory(ctx context.Context, account *plat
 		match.UUID = uuid.String()
 		match.TransactionNote = &note
 		match.AccountUUID = *history.DestUUID
+		match.DestUUID = nil
 		match.Mutation = history.Mutation * -1
 		match.Address = nil
 		return &match, nil
@@ -59,8 +60,8 @@ func (*MockPaymentService) Send(ctx context.Context, source *platform.PaymentAcc
 			TransactionHistories: model.TransactionHistories{
 				UUID:            uuid.String(),
 				AccountUUID:     source.UUID,
-				DestUUID:        &des.PaymentAccounts.UserUUID,
-				Mutation:        amount,
+				DestUUID:        &des.UUID,
+				Mutation:        amount * -1,
 				Currency:        "USD",
 				TransactionDate: time.Now(),
 			},
@@ -95,7 +96,7 @@ func (*MockPaymentService) Withdraw(ctx context.Context, account *platform.Payme
 			TransactionHistories: model.TransactionHistories{
 				UUID:            uuid.String(),
 				AccountUUID:     account.UUID,
-				Mutation:        amount,
+				Mutation:        amount * -1,
 				Currency:        "USD",
 				TransactionDate: time.Now(),
 			},

@@ -7,7 +7,10 @@ import (
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
 
-var ErrPaymentServiceNotSupported = errors.New("payment service not supported")
+var (
+	ErrPaymentServiceNotSupported = errors.New("payment service not supported")
+	ErrInvalidAmount              = errors.New("invalid amount")
+)
 
 type PaymentManager struct {
 	services map[string]platform.PaymentService
@@ -28,6 +31,10 @@ func NewPaymentManager(account *PaymentAccountManager, history *TransactionHisto
 }
 
 func (m *PaymentManager) Send(ctx context.Context, from, to *platform.PaymentAccount, amount int64) (*platform.TransactionHistory, error) {
+	if amount <= 0 {
+		return nil, ErrInvalidAmount
+	}
+
 	service := m.services[from.ServiceID]
 	if service == nil {
 		return nil, ErrPaymentServiceNotSupported
