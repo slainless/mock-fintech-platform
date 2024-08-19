@@ -8,7 +8,7 @@ import (
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
 
-type Create struct {
+type CreatePayload struct {
 	// foreign account id, different from internal account UUID.
 	AccountID    string `json:"account_id" form:"account_id" binding:"required"`
 	ServiceID    string `json:"service_id" form:"service_id" binding:"required"`
@@ -20,7 +20,7 @@ func (s *Service) create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := s.authManager.GetUser(c)
 
-		var create Create
+		var create CreatePayload
 		err := c.ShouldBind(&create)
 		if err != nil {
 			c.String(400, err.Error())
@@ -51,6 +51,6 @@ func (s *Service) create() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(201, gin.H{"account": account, "balance": balance})
+		c.JSON(201, AccountResponse{Account: account, Balance: balance})
 	}
 }

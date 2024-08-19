@@ -1,0 +1,234 @@
+consumes:
+- application/json
+- multipart/form-data
+- application/x-www-form-urlencoded
+definitions:
+  platform.MonetaryAmount:
+    properties:
+      currency:
+        type: string
+      value:
+        type: integer
+    type: object
+  platform.PaymentAccount:
+    properties:
+      foreignID:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      serviceID:
+        type: string
+      userUUID:
+        type: string
+      uuid:
+        type: string
+    type: object
+  platform.TransactionHistory:
+    properties:
+      accountUUID:
+        type: string
+      address:
+        type: string
+      currency:
+        type: string
+      destUUID:
+        type: string
+      id:
+        type: integer
+      mutation:
+        type: integer
+      serviceUUID:
+        type: string
+      status:
+        type: integer
+      transactionDate:
+        type: string
+      transactionNote:
+        type: string
+      transactionType:
+        type: integer
+      userUUID:
+        type: string
+      uuid:
+        type: string
+    type: object
+  user.AccountResponse:
+    properties:
+      account:
+        $ref: '#/definitions/platform.PaymentAccount'
+      balance:
+        $ref: '#/definitions/platform.MonetaryAmount'
+    type: object
+  user.AccountsResponse:
+    properties:
+      accounts:
+        items:
+          $ref: '#/definitions/platform.PaymentAccount'
+        type: array
+    type: object
+  user.CreatePayload:
+    properties:
+      account_id:
+        description: foreign account id, different from internal account UUID.
+        type: string
+      callback:
+        type: string
+      name:
+        type: string
+      service_id:
+        type: string
+    required:
+    - account_id
+    - callback
+    - service_id
+    type: object
+  user.HistoriesResponse:
+    properties:
+      histories:
+        items:
+          $ref: '#/definitions/platform.TransactionHistory'
+        type: array
+    type: object
+  user.RegisterPayload:
+    properties:
+      token:
+        type: string
+    required:
+    - token
+    type: object
+  user.RegisterResponse:
+    properties:
+      status:
+        type: string
+    type: object
+info:
+  contact:
+    name: Aiman Fauzy
+  title: Account Manager Service
+paths:
+  /account:
+    get:
+      parameters:
+      - description: Authentication token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.AccountsResponse'
+        default:
+          description: ""
+          schema:
+            type: string
+      summary: Get user's payment accounts
+    post:
+      parameters:
+      - description: Account data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/user.CreatePayload'
+      - description: Authentication token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/user.AccountResponse'
+        default:
+          description: ""
+          schema:
+            type: string
+      summary: Register user's payment account
+  /account/{account_uuid}:
+    get:
+      parameters:
+      - description: Account UUID
+        in: path
+        name: account_uuid
+        required: true
+        type: string
+      - description: Authentication token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.AccountResponse'
+        default:
+          description: ""
+          schema:
+            type: string
+      summary: Get user's payment account by UUID
+  /history:
+    get:
+      parameters:
+      - in: query
+        name: account_id
+        type: string
+      - in: query
+        name: from
+        type: string
+      - in: query
+        name: to
+        type: string
+      - description: Authentication token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.HistoriesResponse'
+        default:
+          description: ""
+          schema:
+            type: string
+      summary: Get user's payment account histories
+  /register:
+    post:
+      consumes:
+      - application/json
+      - multipart/form-data
+      parameters:
+      - description: JWT token
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/user.RegisterPayload'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/user.RegisterResponse'
+        default:
+          description: ""
+          schema:
+            type: string
+      summary: Register user with JWT token
+swagger: "2.0"

@@ -5,13 +5,17 @@ import (
 	"github.com/slainless/mock-fintech-platform/pkg/core"
 )
 
-type Register struct {
+type RegisterPayload struct {
 	Token string `json:"token" form:"token" binding:"required"`
+}
+
+type RegisterResponse struct {
+	Status string `json:"status"`
 }
 
 func (s *Service) registerWithEmail() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var register Register
+		var register RegisterPayload
 		err := c.ShouldBind(&register)
 		if err != nil {
 			c.String(400, err.Error())
@@ -36,6 +40,8 @@ func (s *Service) registerWithEmail() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(201, gin.H{"status": "ok"})
+		c.JSON(201, RegisterResponse{
+			Status: "ok",
+		})
 	}
 }

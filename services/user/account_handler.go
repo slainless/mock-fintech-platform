@@ -5,7 +5,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/slainless/mock-fintech-platform/pkg/core"
+	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
+
+type AccountResponse struct {
+	Account *platform.PaymentAccount `json:"account"`
+	Balance *platform.MonetaryAmount `json:"balance"`
+}
 
 func (s *Service) account() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -35,6 +41,6 @@ func (s *Service) account() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(200, gin.H{"account": account, "balance": balance})
+		c.JSON(200, AccountResponse{Account: account, Balance: balance})
 	}
 }

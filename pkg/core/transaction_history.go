@@ -28,7 +28,7 @@ func (m *TransactionHistoryManager) GetHistories(ctx context.Context, user *plat
 	}
 }
 
-type DateRange struct {
+type HistoryParams struct {
 	From      *time.Time `form:"from" time_format:"2006-01-02"`
 	To        *time.Time `form:"to" time_format:"2006-01-02"`
 	AccountID string     `form:"account_id" binding:"uuid"`
@@ -36,7 +36,7 @@ type DateRange struct {
 
 // TODO: Fix this brahh
 func (m *TransactionHistoryManager) GetHistoryParams(ctx *gin.Context) (*time.Time, *time.Time, string) {
-	var rg DateRange
+	var rg HistoryParams
 	ctx.ShouldBindQuery(&rg)
 
 	if rg.From == nil {

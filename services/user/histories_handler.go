@@ -2,7 +2,12 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
+
+type HistoriesResponse struct {
+	Histories []platform.TransactionHistory `json:"histories"`
+}
 
 func (s *Service) histories() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -16,6 +21,6 @@ func (s *Service) histories() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(200, gin.H{"histories": histories})
+		c.JSON(200, HistoriesResponse{Histories: histories})
 	}
 }
