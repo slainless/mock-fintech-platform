@@ -6,7 +6,7 @@ import (
 
 type PaymentService interface {
 	// Send sends money from one account to another.
-	Send(ctx context.Context, source, des *PaymentAccount) (*TransactionHistory, error)
+	Send(ctx context.Context, source, des *PaymentAccount, amount int64) (*TransactionHistory, error)
 
 	// Withdraw money.
 	Withdraw(ctx context.Context, account *PaymentAccount, amount int64, callbackData string) (*TransactionHistory, error)

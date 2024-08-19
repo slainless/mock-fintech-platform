@@ -34,7 +34,7 @@ func (m *PaymentManager) Send(ctx context.Context, from, to *platform.PaymentAcc
 		return nil, ErrPaymentServiceNotSupported
 	}
 
-	sourceHistory, err := service.Send(ctx, from, to)
+	sourceHistory, err := service.Send(ctx, from, to, amount)
 	if err != nil {
 		return nil, err
 	}
