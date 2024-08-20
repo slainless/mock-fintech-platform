@@ -37,6 +37,23 @@ func GetAccount(ctx context.Context, db *sql.DB, accountUUID string) (*platform.
 	return &account, nil
 }
 
+func GetAccountWhereUser(ctx context.Context, db *sql.DB, userUUID, accountUUID string) (*platform.PaymentAccount, error) {
+	stmt := SELECT(table.PaymentAccounts.AllColumns).
+		FROM(table.PaymentAccounts).
+		WHERE(
+			table.PaymentAccounts.UserUUID.EQ(String(userUUID)).
+				AND(table.PaymentAccounts.UUID.EQ(String(accountUUID))),
+		)
+
+	var account platform.PaymentAccount
+	err := stmt.QueryContext(ctx, db, &account)
+	if err != nil {
+		return nil, err
+	}
+
+	return &account, nil
+}
+
 func GetTwoAccounts(ctx context.Context, db *sql.DB, FirstUUID, SecondUUID string) (*platform.PaymentAccount, *platform.PaymentAccount, error) {
 	stmt := SELECT(table.PaymentAccounts.AllColumns).
 		FROM(table.PaymentAccounts).

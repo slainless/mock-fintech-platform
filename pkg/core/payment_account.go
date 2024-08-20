@@ -54,6 +54,18 @@ func (m *PaymentAccountManager) GetAccount(ctx context.Context, accountUUID stri
 	return account, nil
 }
 
+func (m *PaymentAccountManager) GetAccountWhereUser(ctx context.Context, userUUID, accountUUID string) (*platform.PaymentAccount, error) {
+	account, err := query.GetAccountWhereUser(ctx, m.db, userUUID, accountUUID)
+	if err != nil {
+		if err == qrm.ErrNoRows {
+			return nil, ErrAccountNotFound
+		}
+		return nil, err
+	}
+
+	return account, nil
+}
+
 func (m *PaymentAccountManager) PrepareTransfer(ctx context.Context, fromUUID, toUUID string) (*platform.PaymentAccount, *platform.PaymentAccount, error) {
 	from, to, err := query.GetTwoAccounts(ctx, m.db, fromUUID, toUUID)
 	if err != nil {

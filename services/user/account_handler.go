@@ -16,7 +16,7 @@ type AccountResponse struct {
 func (s *Service) account() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := s.authManager.GetUser(c)
-		account, err := s.accountManager.GetAccount(c, c.Param("uuid"))
+		account, err := s.accountManager.GetAccountWhereUser(c, user.UUID, c.Param("uuid"))
 		if err != nil {
 			switch {
 			case errors.Is(err, core.ErrAccountNotFound):
