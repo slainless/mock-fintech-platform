@@ -19,8 +19,12 @@
 ### How to start
 
 - Clone the repository
+- Obtain your 3rd party JWT auth secret
+- Copy .env.example to .env
+- Fill AUTH_SECRET with your 3rd party JWT auth secret
 - Change directory into the repository root
 - Run `docker compose up`
+- Use your 3rd party token to test the API
 
 ### Swagger
 
