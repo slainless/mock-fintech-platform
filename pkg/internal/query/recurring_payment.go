@@ -43,6 +43,39 @@ func GetRecurringPaymentWhereUser(ctx context.Context, db *sql.DB, userUUID, uui
 	return &account, nil
 }
 
+func GetRecurringPayments(ctx context.Context, db *sql.DB, accountUUID string) ([]platform.RecurringPayment, error) {
+	stmt := SELECT(table.RecurringPayments.AllColumns.Except(table.RecurringPayments.ID)).
+		FROM(table.RecurringPayments).
+		WHERE(table.RecurringPayments.AccountUUID.EQ(String(accountUUID)))
+
+	accounts := make([]platform.RecurringPayment, 0)
+	err := stmt.QueryContext(ctx, db, &accounts)
+	if err != nil {
+		return nil, err
+	}
+
+	return accounts, nil
+}
+
+func GetRecurringPaymentsOfUser(ctx context.Context, db *sql.DB, userUUID string) ([]platform.RecurringPayment, error) {
+	stmt := SELECT(table.RecurringPayments.AllColumns.Except(table.RecurringPayments.ID)).
+		FROM(
+			table.RecurringPayments.
+				INNER_JOIN(table.PaymentAccounts, table.PaymentAccounts.UUID.EQ(table.RecurringPayments.AccountUUID)),
+		).
+		WHERE(
+			table.PaymentAccounts.UserUUID.EQ(String(userUUID)),
+		)
+
+	accounts := make([]platform.RecurringPayment, 0)
+	err := stmt.QueryContext(ctx, db, &accounts)
+	if err != nil {
+		return nil, err
+	}
+
+	return accounts, nil
+}
+
 func InsertRecurringPayment(ctx context.Context, db *sql.DB, account *platform.RecurringPayment) error {
 	stmt := table.RecurringPayments.INSERT(
 		table.RecurringPayments.AllColumns.Except(table.RecurringPayments.ID),

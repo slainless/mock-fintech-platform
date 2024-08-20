@@ -221,6 +221,21 @@ func (m *RecurringPaymentManager) GetPaymentWhereUser(ctx context.Context, user 
 	return payment, nil
 }
 
+func (m *RecurringPaymentManager) GetPayments(ctx context.Context, user *platform.User, account *platform.PaymentAccount) (payments []platform.RecurringPayment, err error) {
+	if account != nil {
+		payments, err = query.GetRecurringPayments(ctx, m.db, account.UUID)
+	} else {
+		payments, err = query.GetRecurringPaymentsOfUser(ctx, m.db, user.UUID)
+	}
+
+	if err != nil {
+		m.errorTracker.Report(ctx, err)
+		return nil, err
+	}
+
+	return payments, nil
+}
+
 func GetRecurringPaymentType(payment *platform.RecurringPayment) (
 	// platform.RecurringPaymentType,
 	platform.RecurringPaymentChargingMethod,

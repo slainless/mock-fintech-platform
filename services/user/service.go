@@ -11,10 +11,11 @@ import (
 type Service struct {
 	db *sql.DB
 
-	authManager    *core.AuthManager
-	userManager    *core.UserManager
-	accountManager *core.PaymentAccountManager
-	historyManager *core.TransactionHistoryManager
+	authManager       *core.AuthManager
+	userManager       *core.UserManager
+	accountManager    *core.PaymentAccountManager
+	historyManager    *core.TransactionHistoryManager
+	recurringPayments *core.RecurringPaymentManager
 
 	emailJwtAuth *auth.EmailJWTAuthService
 
@@ -33,14 +34,21 @@ func NewService(
 	auth := core.NewAuthManager(user)
 	account := core.NewPaymentAccountManager(db, services, tracker)
 	history := core.NewTransactionHistoryManager(db, tracker)
+	recurringPayments := core.NewRecurringPaymentManager(
+		db,
+		map[string]platform.RecurringPaymentService{},
+		history,
+		tracker,
+	)
 
 	return &Service{
 		db: db,
 
-		authManager:    auth,
-		userManager:    user,
-		accountManager: account,
-		historyManager: history,
+		authManager:       auth,
+		userManager:       user,
+		accountManager:    account,
+		historyManager:    history,
+		recurringPayments: recurringPayments,
 
 		emailJwtAuth: emailJwtAuth,
 
