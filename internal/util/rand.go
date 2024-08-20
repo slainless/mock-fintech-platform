@@ -10,5 +10,5 @@ func MockSleep(dur time.Duration) {
 }
 
 func LeaveItToRNG() bool {
-	return rand.Intn(2) == 1
+	return rand.Intn(3) == 1
 }
