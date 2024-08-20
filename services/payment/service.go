@@ -1,6 +1,7 @@
 package payment
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/slainless/mock-fintech-platform/pkg/auth"
@@ -36,11 +37,13 @@ func NewService(
 	auth := core.NewAuthManager(user)
 	account := core.NewPaymentAccountManager(db, paymentServices, tracker)
 	history := core.NewTransactionHistoryManager(db, tracker)
-	recurringPayment, err := core.NewRecurringPaymentManager(db, recurringPaymentServices, history, tracker)
+	recurringPayment := core.NewRecurringPaymentManager(db, recurringPaymentServices, history, tracker)
+	err := recurringPayment.InitScheduler()
 	if err != nil {
-		tracker.Report(nil, err)
+		tracker.Report(context.TODO(), err)
 		panic(err)
 	}
+
 	payment := core.NewPaymentManager(account, history, paymentServices, tracker)
 
 	return &Service{

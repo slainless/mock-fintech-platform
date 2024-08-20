@@ -34,22 +34,23 @@ func NewRecurringPaymentManager(
 	services map[string]platform.RecurringPaymentService,
 	historyManager *TransactionHistoryManager,
 	tracker platform.ErrorTracker,
-) (*RecurringPaymentManager, error) {
-	scheduler, err := gocron.NewScheduler()
-	if err != nil {
-		return nil, err
-	}
-
-	scheduler.Start()
-
+) *RecurringPaymentManager {
 	return &RecurringPaymentManager{
 		db: db,
 
 		errorTracker: tracker,
 
 		historyManager: historyManager,
-		scheduler:      scheduler,
-	}, nil
+	}
+}
+
+func (m *RecurringPaymentManager) InitScheduler() (err error) {
+	m.scheduler, err = gocron.NewScheduler()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (m *RecurringPaymentManager) Subscribe(ctx context.Context, account *platform.PaymentAccount, serviceID, billingID, callbackData string) (*platform.RecurringPayment, *platform.TransactionHistory, error) {
