@@ -24,6 +24,43 @@ definitions:
       transaction:
         $ref: '#/definitions/platform.TransactionHistory'
     type: object
+  payment.SubscribePayload:
+    properties:
+      account:
+        type: string
+      billing:
+        type: string
+      callback_data:
+        type: string
+      service:
+        type: string
+    required:
+    - account
+    - billing
+    - callback_data
+    - service
+    type: object
+  payment.SubscribeResponse:
+    properties:
+      payment:
+        $ref: '#/definitions/platform.RecurringPayment'
+      transaction:
+        $ref: '#/definitions/platform.TransactionHistory'
+    type: object
+  payment.UnsubscribePayload:
+    properties:
+      payment_id:
+        type: string
+    required:
+    - payment_id
+    type: object
+  payment.UnsubscribeResponse:
+    properties:
+      status:
+        type: string
+      transaction:
+        $ref: '#/definitions/platform.TransactionHistory'
+    type: object
   payment.WithdrawPayload:
     properties:
       account_id:
@@ -43,6 +80,25 @@ definitions:
     properties:
       transaction:
         $ref: '#/definitions/platform.TransactionHistory'
+    type: object
+  platform.RecurringPayment:
+    properties:
+      accountUUID:
+        type: string
+      chargingMethod:
+        type: integer
+      foreignID:
+        type: string
+      id:
+        type: integer
+      lastCharge:
+        type: string
+      schedulerType:
+        type: integer
+      serviceID:
+        type: string
+      uuid:
+        type: string
     type: object
   platform.TransactionHistory:
     properties:
@@ -104,6 +160,58 @@ paths:
           schema:
             type: string
       summary: Send amount to account UUID
+  /subscribe:
+    post:
+      parameters:
+      - description: Subscribe payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/payment.SubscribePayload'
+      - description: Authentication token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/payment.SubscribeResponse'
+        default:
+          description: ""
+          schema:
+            type: string
+      summary: Subscribe to recurring payment
+  /unsubscribe:
+    post:
+      parameters:
+      - description: Unsubscribe payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/payment.UnsubscribePayload'
+      - description: Authentication token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/payment.UnsubscribeResponse'
+        default:
+          description: ""
+          schema:
+            type: string
+      summary: Unsubscribe to recurring payment
   /withdraw:
     post:
       parameters:

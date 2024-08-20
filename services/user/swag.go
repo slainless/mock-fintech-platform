@@ -66,3 +66,13 @@ func stubCreateAccount(c *gin.Context) {}
 // @failure default {string} string
 // @success 200 {object} HistoriesResponse
 func stubHistories(c *gin.Context) {}
+
+// ===
+// @summary Get user's recurring payments
+// @router /subscription [get]
+// @param params query SubscriptionParams true "Subscription params"
+// @param Authorization header string true "Authentication token"
+// @produce json
+// @failure default {string} string
+// @success 200 {object} SubscriptionResponse
+func stubSubscriptions(c *gin.Context) {}

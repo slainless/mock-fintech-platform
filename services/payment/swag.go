@@ -36,3 +36,23 @@ func stubSend(c *gin.Context) {}
 // @failure default {string} string
 // @success 200 {object} WithdrawResponse
 func stubWithdraw(c *gin.Context) {}
+
+// ===
+// @summary Subscribe to recurring payment
+// @router /subscribe [post]
+// @param payload body SubscribePayload true "Subscribe payload"
+// @param Authorization header string true "Authentication token"
+// @produce json
+// @failure default {string} string
+// @success 201 {object} SubscribeResponse
+func stubSubscribe(c *gin.Context) {}
+
+// ===
+// @summary Unsubscribe to recurring payment
+// @router /unsubscribe [post]
+// @param payload body UnsubscribePayload true "Unsubscribe payload"
+// @param Authorization header string true "Authentication token"
+// @produce json
+// @failure default {string} string
+// @success 200 {object} UnsubscribeResponse
+func stubUnsubscribe(c *gin.Context) {}

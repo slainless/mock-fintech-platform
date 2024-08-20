@@ -26,6 +26,25 @@ definitions:
       uuid:
         type: string
     type: object
+  platform.RecurringPayment:
+    properties:
+      accountUUID:
+        type: string
+      chargingMethod:
+        type: integer
+      foreignID:
+        type: string
+      id:
+        type: integer
+      lastCharge:
+        type: string
+      schedulerType:
+        type: integer
+      serviceID:
+        type: string
+      uuid:
+        type: string
+    type: object
   platform.TransactionHistory:
     properties:
       accountUUID:
@@ -103,6 +122,13 @@ definitions:
     properties:
       status:
         type: string
+    type: object
+  user.SubscriptionResponse:
+    properties:
+      subscriptions:
+        items:
+          $ref: '#/definitions/platform.RecurringPayment'
+        type: array
     type: object
 info:
   contact:
@@ -232,4 +258,27 @@ paths:
           schema:
             type: string
       summary: Register user with JWT token
+  /subscription:
+    get:
+      parameters:
+      - in: query
+        name: account_id
+        type: string
+      - description: Authentication token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.SubscriptionResponse'
+        default:
+          description: ""
+          schema:
+            type: string
+      summary: Get user's recurring payments
 swagger: "2.0"

@@ -62,6 +62,86 @@ const docTemplate = `{
                 }
             }
         },
+        "/subscribe": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Subscribe to recurring payment",
+                "parameters": [
+                    {
+                        "description": "Subscribe payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/payment.SubscribePayload"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authentication token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/payment.SubscribeResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/unsubscribe": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Unsubscribe to recurring payment",
+                "parameters": [
+                    {
+                        "description": "Unsubscribe payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/payment.UnsubscribePayload"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authentication token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/payment.UnsubscribeResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/withdraw": {
             "post": {
                 "produces": [
@@ -133,6 +213,62 @@ const docTemplate = `{
                 }
             }
         },
+        "payment.SubscribePayload": {
+            "type": "object",
+            "required": [
+                "account",
+                "billing",
+                "callback_data",
+                "service"
+            ],
+            "properties": {
+                "account": {
+                    "type": "string"
+                },
+                "billing": {
+                    "type": "string"
+                },
+                "callback_data": {
+                    "type": "string"
+                },
+                "service": {
+                    "type": "string"
+                }
+            }
+        },
+        "payment.SubscribeResponse": {
+            "type": "object",
+            "properties": {
+                "payment": {
+                    "$ref": "#/definitions/platform.RecurringPayment"
+                },
+                "transaction": {
+                    "$ref": "#/definitions/platform.TransactionHistory"
+                }
+            }
+        },
+        "payment.UnsubscribePayload": {
+            "type": "object",
+            "required": [
+                "payment_id"
+            ],
+            "properties": {
+                "payment_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "payment.UnsubscribeResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                },
+                "transaction": {
+                    "$ref": "#/definitions/platform.TransactionHistory"
+                }
+            }
+        },
         "payment.WithdrawPayload": {
             "type": "object",
             "required": [
@@ -159,6 +295,35 @@ const docTemplate = `{
             "properties": {
                 "transaction": {
                     "$ref": "#/definitions/platform.TransactionHistory"
+                }
+            }
+        },
+        "platform.RecurringPayment": {
+            "type": "object",
+            "properties": {
+                "accountUUID": {
+                    "type": "string"
+                },
+                "chargingMethod": {
+                    "type": "integer"
+                },
+                "foreignID": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastCharge": {
+                    "type": "string"
+                },
+                "schedulerType": {
+                    "type": "integer"
+                },
+                "serviceID": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
                 }
             }
         },

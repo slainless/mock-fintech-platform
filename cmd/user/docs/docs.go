@@ -211,6 +211,42 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/subscription": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get user's recurring payments",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "account_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authentication token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.SubscriptionResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -241,6 +277,35 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "userUUID": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "platform.RecurringPayment": {
+            "type": "object",
+            "properties": {
+                "accountUUID": {
+                    "type": "string"
+                },
+                "chargingMethod": {
+                    "type": "integer"
+                },
+                "foreignID": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastCharge": {
+                    "type": "string"
+                },
+                "schedulerType": {
+                    "type": "integer"
+                },
+                "serviceID": {
                     "type": "string"
                 },
                 "uuid": {
@@ -364,6 +429,17 @@ const docTemplate = `{
             "properties": {
                 "status": {
                     "type": "string"
+                }
+            }
+        },
+        "user.SubscriptionResponse": {
+            "type": "object",
+            "properties": {
+                "subscriptions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/platform.RecurringPayment"
+                    }
                 }
             }
         }
