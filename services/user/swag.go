@@ -11,6 +11,7 @@ var stub2 *core.HistoryParams
 
 // @title Account Manager Service
 // @contact.name Aiman Fauzy
+// @BasePath /
 
 // @accept json
 // @accept mpfd

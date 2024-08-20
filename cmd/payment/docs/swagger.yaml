@@ -1,0 +1,133 @@
+basePath: /
+consumes:
+- application/json
+- multipart/form-data
+- application/x-www-form-urlencoded
+definitions:
+  payment.SendPayload:
+    properties:
+      account:
+        type: string
+      amount:
+        maximum: 999999999999999
+        minimum: 1
+        type: integer
+      dest:
+        type: string
+    required:
+    - account
+    - amount
+    - dest
+    type: object
+  payment.SendResponse:
+    properties:
+      transaction:
+        $ref: '#/definitions/platform.TransactionHistory'
+    type: object
+  payment.WithdrawPayload:
+    properties:
+      account_id:
+        type: string
+      amount:
+        maximum: 999999999999999
+        minimum: 1
+        type: integer
+      callback:
+        type: string
+    required:
+    - account_id
+    - amount
+    - callback
+    type: object
+  payment.WithdrawResponse:
+    properties:
+      transaction:
+        $ref: '#/definitions/platform.TransactionHistory'
+    type: object
+  platform.TransactionHistory:
+    properties:
+      accountUUID:
+        type: string
+      address:
+        type: string
+      currency:
+        type: string
+      destUUID:
+        type: string
+      id:
+        type: integer
+      mutation:
+        type: integer
+      serviceUUID:
+        type: string
+      status:
+        type: integer
+      transactionDate:
+        type: string
+      transactionNote:
+        type: string
+      transactionType:
+        type: integer
+      userUUID:
+        type: string
+      uuid:
+        type: string
+    type: object
+info:
+  contact:
+    name: Aiman Fauzy
+  title: Payment Manager Service
+paths:
+  /send:
+    post:
+      parameters:
+      - description: Send payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/payment.SendPayload'
+      - description: Authentication token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/payment.SendResponse'
+        default:
+          description: ""
+          schema:
+            type: string
+      summary: Send amount to account UUID
+  /withdraw:
+    post:
+      parameters:
+      - description: Withdraw payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/payment.WithdrawPayload'
+      - description: Authentication token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/payment.WithdrawResponse'
+        default:
+          description: ""
+          schema:
+            type: string
+      summary: Withdraw amount from account
+swagger: "2.0"

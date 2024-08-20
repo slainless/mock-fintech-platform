@@ -1,0 +1,201 @@
+{
+    "consumes": [
+        "application/json",
+        "multipart/form-data",
+        "application/x-www-form-urlencoded"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "title": "Payment Manager Service",
+        "contact": {
+            "name": "Aiman Fauzy"
+        }
+    },
+    "basePath": "/",
+    "paths": {
+        "/send": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Send amount to account UUID",
+                "parameters": [
+                    {
+                        "description": "Send payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/payment.SendPayload"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authentication token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/payment.SendResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/withdraw": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Withdraw amount from account",
+                "parameters": [
+                    {
+                        "description": "Withdraw payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/payment.WithdrawPayload"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authentication token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/payment.WithdrawResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "payment.SendPayload": {
+            "type": "object",
+            "required": [
+                "account",
+                "amount",
+                "dest"
+            ],
+            "properties": {
+                "account": {
+                    "type": "string"
+                },
+                "amount": {
+                    "type": "integer",
+                    "maximum": 999999999999999,
+                    "minimum": 1
+                },
+                "dest": {
+                    "type": "string"
+                }
+            }
+        },
+        "payment.SendResponse": {
+            "type": "object",
+            "properties": {
+                "transaction": {
+                    "$ref": "#/definitions/platform.TransactionHistory"
+                }
+            }
+        },
+        "payment.WithdrawPayload": {
+            "type": "object",
+            "required": [
+                "account_id",
+                "amount",
+                "callback"
+            ],
+            "properties": {
+                "account_id": {
+                    "type": "string"
+                },
+                "amount": {
+                    "type": "integer",
+                    "maximum": 999999999999999,
+                    "minimum": 1
+                },
+                "callback": {
+                    "type": "string"
+                }
+            }
+        },
+        "payment.WithdrawResponse": {
+            "type": "object",
+            "properties": {
+                "transaction": {
+                    "$ref": "#/definitions/platform.TransactionHistory"
+                }
+            }
+        },
+        "platform.TransactionHistory": {
+            "type": "object",
+            "properties": {
+                "accountUUID": {
+                    "type": "string"
+                },
+                "address": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "destUUID": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "mutation": {
+                    "type": "integer"
+                },
+                "serviceUUID": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "transactionDate": {
+                    "type": "string"
+                },
+                "transactionNote": {
+                    "type": "string"
+                },
+                "transactionType": {
+                    "type": "integer"
+                },
+                "userUUID": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

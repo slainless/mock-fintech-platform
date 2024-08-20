@@ -80,6 +80,12 @@ migration conflict ourselves before the service can be ran.
 
 ### Service usage
 
+> [!IMPORTANT]
+> Technical API specifications can be seen by accessing service's swagger endpoint:
+>
+> - User API: http://localhost:8080/swagger/index.html
+> - Payment API: http://localhost:8081/swagger/index.html
+
 By default, the stack should expose these ports:
 
 - 7777: PGAdmin4
@@ -87,8 +93,6 @@ By default, the stack should expose these ports:
 - 8081: Transaction manager service
 
 PostgreSQL is intentionally hidden, but it can be accessed externally by exposing it's port in `docker-compose.yml`.
-
-<!-- TODO: add swagger docs here -->
 
 > [!CAUTION]
 > Even thought the project is using `MockPaymentService`, some of the endpoints are intentionally set up to
