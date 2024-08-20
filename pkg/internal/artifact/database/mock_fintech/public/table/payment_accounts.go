@@ -17,7 +17,6 @@ type paymentAccountsTable struct {
 	postgres.Table
 
 	// Columns
-	ID        postgres.ColumnInteger
 	UUID      postgres.ColumnString
 	UserUUID  postgres.ColumnString
 	ServiceID postgres.ColumnString
@@ -63,21 +62,19 @@ func newPaymentAccountsTable(schemaName, tableName, alias string) *PaymentAccoun
 
 func newPaymentAccountsTableImpl(schemaName, tableName, alias string) paymentAccountsTable {
 	var (
-		IDColumn        = postgres.IntegerColumn("id")
 		UUIDColumn      = postgres.StringColumn("uuid")
 		UserUUIDColumn  = postgres.StringColumn("user_uuid")
 		ServiceIDColumn = postgres.StringColumn("service_id")
 		NameColumn      = postgres.StringColumn("name")
 		ForeignIDColumn = postgres.StringColumn("foreign_id")
-		allColumns      = postgres.ColumnList{IDColumn, UUIDColumn, UserUUIDColumn, ServiceIDColumn, NameColumn, ForeignIDColumn}
-		mutableColumns  = postgres.ColumnList{IDColumn, UUIDColumn, UserUUIDColumn, ServiceIDColumn, NameColumn, ForeignIDColumn}
+		allColumns      = postgres.ColumnList{UUIDColumn, UserUUIDColumn, ServiceIDColumn, NameColumn, ForeignIDColumn}
+		mutableColumns  = postgres.ColumnList{UserUUIDColumn, ServiceIDColumn, NameColumn, ForeignIDColumn}
 	)
 
 	return paymentAccountsTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:        IDColumn,
 		UUID:      UUIDColumn,
 		UserUUID:  UserUUIDColumn,
 		ServiceID: ServiceIDColumn,

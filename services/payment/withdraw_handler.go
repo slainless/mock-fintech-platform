@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/slainless/mock-fintech-platform/pkg/core"
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
@@ -29,7 +30,7 @@ func (s *Service) withdraw() gin.HandlerFunc {
 			return
 		}
 
-		account, err := s.accountManager.GetAccountWhereUser(c, user, withdraw.AccountUUID)
+		account, err := s.accountManager.GetAccountWhereUser(c, user, uuid.MustParse(withdraw.AccountUUID))
 		if err != nil {
 			switch {
 			case errors.Is(err, core.ErrAccountNotFound):

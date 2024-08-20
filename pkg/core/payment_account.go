@@ -43,7 +43,7 @@ func (m *PaymentAccountManager) GetAccounts(ctx context.Context, user *platform.
 	return accounts, nil
 }
 
-func (m *PaymentAccountManager) GetAccount(ctx context.Context, accountUUID string) (*platform.PaymentAccount, error) {
+func (m *PaymentAccountManager) GetAccount(ctx context.Context, accountUUID uuid.UUID) (*platform.PaymentAccount, error) {
 	account, err := query.GetAccount(ctx, m.db, accountUUID)
 	if err != nil {
 		if err == qrm.ErrNoRows {
@@ -56,7 +56,7 @@ func (m *PaymentAccountManager) GetAccount(ctx context.Context, accountUUID stri
 	return account, nil
 }
 
-func (m *PaymentAccountManager) GetAccountWhereUser(ctx context.Context, user *platform.User, accountUUID string) (*platform.PaymentAccount, error) {
+func (m *PaymentAccountManager) GetAccountWhereUser(ctx context.Context, user *platform.User, accountUUID uuid.UUID) (*platform.PaymentAccount, error) {
 	account, err := query.GetAccountWhereUser(ctx, m.db, user.UUID, accountUUID)
 	if err != nil {
 		if err == qrm.ErrNoRows {
@@ -69,7 +69,7 @@ func (m *PaymentAccountManager) GetAccountWhereUser(ctx context.Context, user *p
 	return account, nil
 }
 
-func (m *PaymentAccountManager) PrepareTransfer(ctx context.Context, fromUUID, toUUID string) (*platform.PaymentAccount, *platform.PaymentAccount, error) {
+func (m *PaymentAccountManager) PrepareTransfer(ctx context.Context, fromUUID, toUUID uuid.UUID) (*platform.PaymentAccount, *platform.PaymentAccount, error) {
 	from, to, err := query.GetTwoAccounts(ctx, m.db, fromUUID, toUUID)
 	if err != nil {
 		m.errorTracker.Report(ctx, err)
@@ -87,7 +87,7 @@ func (m *PaymentAccountManager) PrepareTransfer(ctx context.Context, fromUUID, t
 	return from, to, nil
 }
 
-func (m *PaymentAccountManager) CheckOwner(ctx context.Context, user *platform.User, accountUUID string) error {
+func (m *PaymentAccountManager) CheckOwner(ctx context.Context, user *platform.User, accountUUID uuid.UUID) error {
 	err := query.CheckOwner(ctx, m.db, user.UUID, accountUUID)
 	if err != nil {
 		if err == qrm.ErrNoRows {
@@ -127,15 +127,8 @@ func (m *PaymentAccountManager) Register(ctx context.Context, user *platform.Use
 		return nil, err
 	}
 
-	uuid, err := uuid.NewV7()
-	if err != nil {
-		m.errorTracker.Report(ctx, err)
-		return nil, err
-	}
-
 	account := &platform.PaymentAccount{
 		PaymentAccounts: model.PaymentAccounts{
-			UUID:      uuid.String(),
 			UserUUID:  user.UUID,
 			ServiceID: serviceID,
 			ForeignID: accountForeignID,

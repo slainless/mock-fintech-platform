@@ -2,6 +2,7 @@ package payment
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/slainless/mock-fintech-platform/pkg/core"
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
@@ -37,7 +38,10 @@ func (s *Service) send() gin.HandlerFunc {
 			return
 		}
 
-		err = s.accountManager.CheckOwner(c, user, send.AccountUUID)
+		sourceUUID := uuid.MustParse(send.AccountUUID)
+		destUUID := uuid.MustParse(send.DestUUID)
+
+		err = s.accountManager.CheckOwner(c, user, sourceUUID)
 		if err != nil {
 			switch err {
 			case core.ErrAccountNotFound:
@@ -48,7 +52,7 @@ func (s *Service) send() gin.HandlerFunc {
 			return
 		}
 
-		from, to, err := s.accountManager.PrepareTransfer(c, send.AccountUUID, send.DestUUID)
+		from, to, err := s.accountManager.PrepareTransfer(c, sourceUUID, destUUID)
 		if err != nil {
 			switch err {
 			case core.ErrAccountNotFound, core.ErrInvalidTransferDestination:

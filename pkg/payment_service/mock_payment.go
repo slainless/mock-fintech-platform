@@ -29,13 +29,8 @@ func (*MockPaymentService) GetMatchingHistory(ctx context.Context, account *plat
 	if util.LeaveItToRNG() {
 		return nil, errors.New("Oops! Failed to get matching history")
 	} else {
-		uuid, err := uuid.NewV7()
-		if err != nil {
-			return nil, err
-		}
-		note := "Received from " + account.UserUUID
+		note := "Received from " + account.UserUUID.String()
 		match := *history
-		match.UUID = uuid.String()
 		match.TransactionNote = &note
 		match.AccountUUID = *history.DestUUID
 		match.DestUUID = nil
@@ -51,14 +46,9 @@ func (*MockPaymentService) Send(ctx context.Context, source *platform.PaymentAcc
 	if util.LeaveItToRNG() {
 		return nil, errors.New("Failed to send money")
 	} else {
-		uuid, err := uuid.NewV7()
-		if err != nil {
-			return nil, err
-		}
-
 		return &platform.TransactionHistory{
 			TransactionHistories: model.TransactionHistories{
-				UUID:            uuid.String(),
+				UUID:            uuid.New(),
 				AccountUUID:     source.UUID,
 				DestUUID:        &des.UUID,
 				Mutation:        amount * -1,
@@ -87,14 +77,9 @@ func (*MockPaymentService) Withdraw(ctx context.Context, account *platform.Payme
 	if util.LeaveItToRNG() {
 		return nil, errors.New("Failed to withdraw money")
 	} else {
-		uuid, err := uuid.NewV7()
-		if err != nil {
-			return nil, err
-		}
-
 		return &platform.TransactionHistory{
 			TransactionHistories: model.TransactionHistories{
-				UUID:            uuid.String(),
+				UUID:            uuid.New(),
 				AccountUUID:     account.UUID,
 				Mutation:        amount * -1,
 				Currency:        "USD",

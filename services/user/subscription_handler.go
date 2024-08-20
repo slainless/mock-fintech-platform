@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/slainless/mock-fintech-platform/pkg/core"
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
@@ -26,15 +27,18 @@ func (s *Service) subscription() gin.HandlerFunc {
 			return
 		}
 
-		account, err := s.accountManager.GetAccountWhereUser(c, user, *params.AccountUUID)
-		if err != nil {
-			switch {
-			case errors.Is(err, core.ErrAccountNotFound):
-				c.String(404, err.Error())
-			default:
-				c.String(500, "Failed to get account")
+		var account *platform.PaymentAccount
+		if params.AccountUUID != nil {
+			account, err = s.accountManager.GetAccountWhereUser(c, user, uuid.MustParse(*params.AccountUUID))
+			if err != nil {
+				switch {
+				case errors.Is(err, core.ErrAccountNotFound):
+					c.String(404, err.Error())
+				default:
+					c.String(500, "Failed to get account")
+				}
+				return
 			}
-			return
 		}
 
 		payments, err := s.recurringPayments.GetPayments(c, user, account)

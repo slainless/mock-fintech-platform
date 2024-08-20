@@ -8,14 +8,14 @@
 package model
 
 import (
+	"github.com/google/uuid"
 	"time"
 )
 
 type TransactionHistories struct {
-	ID              int32
-	UUID            string
-	AccountUUID     string
-	DestUUID        *string
+	UUID            uuid.UUID `sql:"primary_key"`
+	AccountUUID     uuid.UUID
+	DestUUID        *uuid.UUID
 	Mutation        int64
 	Currency        string
 	Status          int16

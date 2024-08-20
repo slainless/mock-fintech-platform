@@ -8,14 +8,14 @@
 package model
 
 import (
+	"github.com/google/uuid"
 	"time"
 )
 
 type RecurringPayments struct {
-	ID             int32
-	UUID           string
+	UUID           uuid.UUID `sql:"primary_key"`
 	ServiceID      string
-	AccountUUID    string
+	AccountUUID    uuid.UUID
 	SchedulerType  int16
 	LastCharge     *time.Time
 	ForeignID      string

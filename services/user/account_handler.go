@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/slainless/mock-fintech-platform/pkg/core"
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
@@ -16,7 +17,14 @@ type AccountResponse struct {
 func (s *Service) account() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := s.authManager.GetUser(c)
-		account, err := s.accountManager.GetAccountWhereUser(c, user, c.Param("uuid"))
+
+		accountUUID, err := uuid.Parse(c.Param("uuid"))
+		if err != nil {
+			c.String(400, err.Error())
+			return
+		}
+
+		account, err := s.accountManager.GetAccountWhereUser(c, user, accountUUID)
 		if err != nil {
 			switch {
 			case errors.Is(err, core.ErrAccountNotFound):

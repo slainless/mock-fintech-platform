@@ -128,13 +128,7 @@ func (m *RecurringPaymentManager) Unsubscribe(ctx context.Context, payment *plat
 		// return nil, err
 	}
 
-	id, err := uuid.Parse(payment.UUID)
-	if err != nil {
-		m.errorTracker.Report(ctx, err)
-		return nil, err
-	}
-
-	err = m.scheduler.RemoveJob(id)
+	err = m.scheduler.RemoveJob(payment.UUID)
 	if err != nil {
 		if err != gocron.ErrJobNotFound {
 			m.errorTracker.Report(ctx, err)
@@ -163,15 +157,10 @@ func (m *RecurringPaymentManager) Bill(ctx context.Context, account *platform.Re
 }
 
 func (m *RecurringPaymentManager) Schedule(ctx context.Context, service platform.RecurringPaymentService, payment *platform.RecurringPayment) error {
-	id, err := uuid.Parse(payment.UUID)
-	if err != nil {
-		return err
-	}
-
 	job, err := m.scheduler.NewJob(
 		gocron.MonthlyJob(1, gocron.NewDaysOfTheMonth(1), gocron.NewAtTimes(gocron.NewAtTime(0, 0, 0))),
 		gocron.NewTask(func(m *RecurringPaymentManager, id uuid.UUID) {
-			payment, err := m.GetPayment(context.TODO(), id.String())
+			payment, err := m.GetPayment(context.TODO(), id)
 			if err != nil {
 				if err == ErrRecurringPaymentNotFound {
 					m.scheduler.RemoveJob(id)
@@ -181,8 +170,8 @@ func (m *RecurringPaymentManager) Schedule(ctx context.Context, service platform
 			}
 
 			m.Bill(context.TODO(), payment)
-		}, m, id),
-		gocron.WithIdentifier(id),
+		}, m, payment.UUID),
+		gocron.WithIdentifier(payment.UUID),
 	)
 
 	if err != nil {
@@ -193,7 +182,7 @@ func (m *RecurringPaymentManager) Schedule(ctx context.Context, service platform
 	return nil
 }
 
-func (m *RecurringPaymentManager) GetPayment(ctx context.Context, uuid string) (*platform.RecurringPayment, error) {
+func (m *RecurringPaymentManager) GetPayment(ctx context.Context, uuid uuid.UUID) (*platform.RecurringPayment, error) {
 	payment, err := query.GetRecurringPayment(ctx, m.db, uuid)
 	if err != nil {
 		if err == qrm.ErrNoRows {
@@ -207,7 +196,7 @@ func (m *RecurringPaymentManager) GetPayment(ctx context.Context, uuid string) (
 	return payment, nil
 }
 
-func (m *RecurringPaymentManager) GetPaymentWhereUser(ctx context.Context, user *platform.User, uuid string) (*platform.RecurringPayment, error) {
+func (m *RecurringPaymentManager) GetPaymentWhereUser(ctx context.Context, user *platform.User, uuid uuid.UUID) (*platform.RecurringPayment, error) {
 	payment, err := query.GetRecurringPaymentWhereUser(ctx, m.db, user.UUID, uuid)
 	if err != nil {
 		if err == qrm.ErrNoRows {

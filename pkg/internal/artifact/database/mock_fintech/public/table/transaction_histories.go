@@ -17,7 +17,6 @@ type transactionHistoriesTable struct {
 	postgres.Table
 
 	// Columns
-	ID              postgres.ColumnInteger
 	UUID            postgres.ColumnString
 	AccountUUID     postgres.ColumnString
 	DestUUID        postgres.ColumnString
@@ -68,7 +67,6 @@ func newTransactionHistoriesTable(schemaName, tableName, alias string) *Transact
 
 func newTransactionHistoriesTableImpl(schemaName, tableName, alias string) transactionHistoriesTable {
 	var (
-		IDColumn              = postgres.IntegerColumn("id")
 		UUIDColumn            = postgres.StringColumn("uuid")
 		AccountUUIDColumn     = postgres.StringColumn("account_uuid")
 		DestUUIDColumn        = postgres.StringColumn("dest_uuid")
@@ -79,15 +77,14 @@ func newTransactionHistoriesTableImpl(schemaName, tableName, alias string) trans
 		TransactionNoteColumn = postgres.StringColumn("transaction_note")
 		TransactionDateColumn = postgres.TimestampColumn("transaction_date")
 		TransactionTypeColumn = postgres.IntegerColumn("transaction_type")
-		allColumns            = postgres.ColumnList{IDColumn, UUIDColumn, AccountUUIDColumn, DestUUIDColumn, MutationColumn, CurrencyColumn, StatusColumn, AddressColumn, TransactionNoteColumn, TransactionDateColumn, TransactionTypeColumn}
-		mutableColumns        = postgres.ColumnList{IDColumn, UUIDColumn, AccountUUIDColumn, DestUUIDColumn, MutationColumn, CurrencyColumn, StatusColumn, AddressColumn, TransactionNoteColumn, TransactionDateColumn, TransactionTypeColumn}
+		allColumns            = postgres.ColumnList{UUIDColumn, AccountUUIDColumn, DestUUIDColumn, MutationColumn, CurrencyColumn, StatusColumn, AddressColumn, TransactionNoteColumn, TransactionDateColumn, TransactionTypeColumn}
+		mutableColumns        = postgres.ColumnList{AccountUUIDColumn, DestUUIDColumn, MutationColumn, CurrencyColumn, StatusColumn, AddressColumn, TransactionNoteColumn, TransactionDateColumn, TransactionTypeColumn}
 	)
 
 	return transactionHistoriesTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:              IDColumn,
 		UUID:            UUIDColumn,
 		AccountUUID:     AccountUUIDColumn,
 		DestUUID:        DestUUIDColumn,

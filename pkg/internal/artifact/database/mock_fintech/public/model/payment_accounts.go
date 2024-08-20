@@ -7,10 +7,13 @@
 
 package model
 
+import (
+	"github.com/google/uuid"
+)
+
 type PaymentAccounts struct {
-	ID        int32
-	UUID      string
-	UserUUID  string
+	UUID      uuid.UUID `sql:"primary_key"`
+	UserUUID  uuid.UUID
 	ServiceID string
 	Name      *string
 	ForeignID string

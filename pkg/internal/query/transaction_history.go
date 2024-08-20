@@ -6,6 +6,7 @@ import (
 	"time"
 
 	. "github.com/go-jet/jet/v2/postgres"
+	"github.com/google/uuid"
 	"github.com/slainless/mock-fintech-platform/pkg/internal/artifact/database/mock_fintech/public/table"
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
@@ -23,10 +24,10 @@ func historySelection() SelectStatement {
 		)
 }
 
-func GetHistoriesOfAccount(ctx context.Context, db *sql.DB, accountUUID string, from, to time.Time) ([]platform.TransactionHistory, error) {
+func GetHistoriesOfAccount(ctx context.Context, db *sql.DB, accountUUID uuid.UUID, from, to time.Time) ([]platform.TransactionHistory, error) {
 	stmt := historySelection().
 		WHERE(
-			table.TransactionHistories.AccountUUID.EQ(String(accountUUID)).
+			table.TransactionHistories.AccountUUID.EQ(UUID(accountUUID)).
 				AND(table.TransactionHistories.TransactionDate.GT_EQ(TimestampT(from))).
 				AND(table.TransactionHistories.TransactionDate.LT_EQ(TimestampT(to))),
 		)
@@ -40,10 +41,10 @@ func GetHistoriesOfAccount(ctx context.Context, db *sql.DB, accountUUID string, 
 	return histories, nil
 }
 
-func GetHistories(ctx context.Context, db *sql.DB, userUUID string, from, to time.Time) ([]platform.TransactionHistory, error) {
+func GetHistories(ctx context.Context, db *sql.DB, userUUID uuid.UUID, from, to time.Time) ([]platform.TransactionHistory, error) {
 	stmt := historySelection().
 		WHERE(
-			table.Users.UUID.EQ(String(userUUID)).
+			table.Users.UUID.EQ(UUID(userUUID)).
 				AND(table.TransactionHistories.TransactionDate.GT_EQ(TimestampT(from))).
 				AND(table.TransactionHistories.TransactionDate.LT_EQ(TimestampT(to))),
 		)
@@ -58,10 +59,9 @@ func GetHistories(ctx context.Context, db *sql.DB, userUUID string, from, to tim
 }
 
 func InsertHistories(ctx context.Context, db *sql.DB, histories []platform.TransactionHistory) error {
-	stmt := table.TransactionHistories.INSERT(
-		table.TransactionHistories.AllColumns.Except(table.TransactionHistories.ID),
-	).
-		MODELS(histories)
+	stmt := table.TransactionHistories.INSERT(table.TransactionHistories.MutableColumns).
+		MODELS(histories).
+		RETURNING(table.TransactionHistories.AllColumns)
 
 	_, err := stmt.ExecContext(ctx, db)
 	return err

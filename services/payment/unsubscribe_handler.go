@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/slainless/mock-fintech-platform/pkg/core"
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
@@ -27,7 +28,7 @@ func (s *Service) unsubscribe() gin.HandlerFunc {
 			return
 		}
 
-		payment, err := s.recurringPaymentManager.GetPaymentWhereUser(c, user, payload.PaymentUUID)
+		payment, err := s.recurringPaymentManager.GetPaymentWhereUser(c, user, uuid.MustParse(payload.PaymentUUID))
 		if err != nil {
 			switch {
 			case errors.Is(err, core.ErrRecurringPaymentNotFound):

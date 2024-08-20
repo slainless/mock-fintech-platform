@@ -17,7 +17,6 @@ type recurringPaymentsTable struct {
 	postgres.Table
 
 	// Columns
-	ID             postgres.ColumnInteger
 	UUID           postgres.ColumnString
 	ServiceID      postgres.ColumnString
 	AccountUUID    postgres.ColumnString
@@ -65,7 +64,6 @@ func newRecurringPaymentsTable(schemaName, tableName, alias string) *RecurringPa
 
 func newRecurringPaymentsTableImpl(schemaName, tableName, alias string) recurringPaymentsTable {
 	var (
-		IDColumn             = postgres.IntegerColumn("id")
 		UUIDColumn           = postgres.StringColumn("uuid")
 		ServiceIDColumn      = postgres.StringColumn("service_id")
 		AccountUUIDColumn    = postgres.StringColumn("account_uuid")
@@ -73,15 +71,14 @@ func newRecurringPaymentsTableImpl(schemaName, tableName, alias string) recurrin
 		LastChargeColumn     = postgres.TimestampColumn("last_charge")
 		ForeignIDColumn      = postgres.StringColumn("foreign_id")
 		ChargingMethodColumn = postgres.IntegerColumn("charging_method")
-		allColumns           = postgres.ColumnList{IDColumn, UUIDColumn, ServiceIDColumn, AccountUUIDColumn, SchedulerTypeColumn, LastChargeColumn, ForeignIDColumn, ChargingMethodColumn}
-		mutableColumns       = postgres.ColumnList{IDColumn, UUIDColumn, ServiceIDColumn, AccountUUIDColumn, SchedulerTypeColumn, LastChargeColumn, ForeignIDColumn, ChargingMethodColumn}
+		allColumns           = postgres.ColumnList{UUIDColumn, ServiceIDColumn, AccountUUIDColumn, SchedulerTypeColumn, LastChargeColumn, ForeignIDColumn, ChargingMethodColumn}
+		mutableColumns       = postgres.ColumnList{ServiceIDColumn, AccountUUIDColumn, SchedulerTypeColumn, LastChargeColumn, ForeignIDColumn, ChargingMethodColumn}
 	)
 
 	return recurringPaymentsTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:             IDColumn,
 		UUID:           UUIDColumn,
 		ServiceID:      ServiceIDColumn,
 		AccountUUID:    AccountUUIDColumn,

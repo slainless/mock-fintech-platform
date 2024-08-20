@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/slainless/mock-fintech-platform/pkg/core"
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
@@ -30,7 +31,7 @@ func (s *Service) subscribe() gin.HandlerFunc {
 			return
 		}
 
-		account, err := s.accountManager.GetAccountWhereUser(c, user, payload.AccountUUID)
+		account, err := s.accountManager.GetAccountWhereUser(c, user, uuid.MustParse(payload.AccountUUID))
 		if err != nil {
 			switch {
 			case errors.Is(err, core.ErrAccountNotFound):

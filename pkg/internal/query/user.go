@@ -39,41 +39,30 @@ func GetUser(ctx context.Context, db *sql.DB, email string) (*platform.User, err
 	return &user, nil
 }
 
-func Authenticate(ctx context.Context, db *sql.DB, email string, password []byte) (string, error) {
-	stmt := SELECT(
-		table.Users.PasswordHash,
-		table.Users.UUID,
-	).
+func Authenticate(ctx context.Context, db *sql.DB, email string, password []byte) (uuid.UUID, error) {
+	stmt := SELECT(table.Users.PasswordHash, table.Users.UUID).
 		FROM(table.Users).
 		WHERE(table.Users.Email.EQ(String(email)))
 
 	var user model.Users
 	err := stmt.QueryContext(ctx, db, &user)
 	if err != nil {
-		return "", err
+		return uuid.Nil, err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(*user.PasswordHash), password)
 	if err != nil {
-		return "", err
+		return uuid.Nil, err
 	}
 
 	return user.UUID, nil
 }
 
 func InsertFreshUser(ctx context.Context, db *sql.DB, email string) error {
-	uuid, err := uuid.NewV7()
-	if err != nil {
-		return err
-	}
+	stmt := table.Users.INSERT(table.Users.Email).
+		VALUES(String(email))
 
-	stmt := table.Users.INSERT(
-		table.Users.Email,
-		table.Users.UUID,
-	).
-		VALUES(String(email), String(uuid.String()))
-
-	_, err = stmt.ExecContext(ctx, db)
+	_, err := stmt.ExecContext(ctx, db)
 	if err != nil {
 		return err
 	}

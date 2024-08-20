@@ -17,7 +17,6 @@ type usersTable struct {
 	postgres.Table
 
 	// Columns
-	ID           postgres.ColumnInteger
 	UUID         postgres.ColumnString
 	FullName     postgres.ColumnString
 	UserName     postgres.ColumnString
@@ -63,21 +62,19 @@ func newUsersTable(schemaName, tableName, alias string) *UsersTable {
 
 func newUsersTableImpl(schemaName, tableName, alias string) usersTable {
 	var (
-		IDColumn           = postgres.IntegerColumn("id")
 		UUIDColumn         = postgres.StringColumn("uuid")
 		FullNameColumn     = postgres.StringColumn("full_name")
 		UserNameColumn     = postgres.StringColumn("user_name")
 		EmailColumn        = postgres.StringColumn("email")
 		PasswordHashColumn = postgres.StringColumn("password_hash")
-		allColumns         = postgres.ColumnList{IDColumn, UUIDColumn, FullNameColumn, UserNameColumn, EmailColumn, PasswordHashColumn}
-		mutableColumns     = postgres.ColumnList{IDColumn, UUIDColumn, FullNameColumn, UserNameColumn, EmailColumn, PasswordHashColumn}
+		allColumns         = postgres.ColumnList{UUIDColumn, FullNameColumn, UserNameColumn, EmailColumn, PasswordHashColumn}
+		mutableColumns     = postgres.ColumnList{FullNameColumn, UserNameColumn, EmailColumn, PasswordHashColumn}
 	)
 
 	return usersTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:           IDColumn,
 		UUID:         UUIDColumn,
 		FullName:     FullNameColumn,
 		UserName:     UserNameColumn,
