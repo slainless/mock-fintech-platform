@@ -38,7 +38,6 @@ func (s *Service) create() gin.HandlerFunc {
 			case errors.Is(err, core.ErrPaymentServiceNotSupported):
 				c.String(501, err.Error())
 			default:
-				s.errorTracker.Report(c, err)
 				c.String(500, "Failed to register account")
 			}
 			return
@@ -46,7 +45,6 @@ func (s *Service) create() gin.HandlerFunc {
 
 		balance, err := s.accountManager.GetBalance(c, account)
 		if err != nil {
-			s.errorTracker.Report(c, err)
 			// c.String(500, "Failed to get account balance post-registration\nBut, don't worry, your account is successfully created")
 			return
 		}

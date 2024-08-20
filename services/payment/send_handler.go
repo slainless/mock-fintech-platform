@@ -44,7 +44,6 @@ func (s *Service) send() gin.HandlerFunc {
 				c.String(400, err.Error())
 			default:
 				c.String(500, "Failed to check account")
-				s.errorTracker.Report(c, err)
 			}
 			return
 		}
@@ -56,7 +55,6 @@ func (s *Service) send() gin.HandlerFunc {
 				c.String(400, err.Error())
 			default:
 				c.String(500, "Failed to prepare transfer")
-				s.errorTracker.Report(c, err)
 			}
 			return
 		}
@@ -68,7 +66,6 @@ func (s *Service) send() gin.HandlerFunc {
 				c.String(501, err.Error())
 			default:
 				c.String(500, "Failed to send")
-				s.errorTracker.Report(c, err)
 			}
 			return
 		}

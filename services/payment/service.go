@@ -31,11 +31,11 @@ func NewService(
 ) *Service {
 	emailJwtAuth := auth.NewEmailJWTAuthService([]byte(authSecret))
 
-	user := core.NewUserManager(db)
+	user := core.NewUserManager(db, tracker)
 	auth := core.NewAuthManager(user)
 	account := core.NewPaymentAccountManager(db, services, tracker)
-	history := core.NewTransactionHistoryManager(db)
-	recurringPayment := core.NewRecurringPaymentManager(db)
+	history := core.NewTransactionHistoryManager(db, tracker)
+	recurringPayment := core.NewRecurringPaymentManager(db, tracker)
 	payment := core.NewPaymentManager(account, history, services, tracker)
 
 	return &Service{

@@ -35,7 +35,6 @@ func (s *Service) registerWithEmail() gin.HandlerFunc {
 				c.String(409, err.Error())
 			default:
 				c.String(500, "Failed to register user")
-				s.errorTracker.Report(c, err)
 			}
 			return
 		}

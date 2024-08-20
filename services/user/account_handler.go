@@ -23,7 +23,6 @@ func (s *Service) account() gin.HandlerFunc {
 				c.String(404, err.Error())
 			default:
 				c.String(500, "Failed to get account")
-				s.errorTracker.Report(c, err)
 			}
 			return
 		}

@@ -36,6 +36,7 @@ func NewPaymentAccountManager(db *sql.DB, svc map[string]platform.PaymentService
 func (m *PaymentAccountManager) GetAccounts(ctx context.Context, user *platform.User) ([]platform.PaymentAccount, error) {
 	accounts, err := query.GetAllAccounts(ctx, m.db, user.UUID)
 	if err != nil {
+		m.errorTracker.Report(ctx, err)
 		return nil, err
 	}
 
@@ -48,6 +49,7 @@ func (m *PaymentAccountManager) GetAccount(ctx context.Context, accountUUID stri
 		if err == qrm.ErrNoRows {
 			return nil, ErrAccountNotFound
 		}
+		m.errorTracker.Report(ctx, err)
 		return nil, err
 	}
 
@@ -60,6 +62,7 @@ func (m *PaymentAccountManager) GetAccountWhereUser(ctx context.Context, userUUI
 		if err == qrm.ErrNoRows {
 			return nil, ErrAccountNotFound
 		}
+		m.errorTracker.Report(ctx, err)
 		return nil, err
 	}
 
@@ -69,6 +72,7 @@ func (m *PaymentAccountManager) GetAccountWhereUser(ctx context.Context, userUUI
 func (m *PaymentAccountManager) PrepareTransfer(ctx context.Context, fromUUID, toUUID string) (*platform.PaymentAccount, *platform.PaymentAccount, error) {
 	from, to, err := query.GetTwoAccounts(ctx, m.db, fromUUID, toUUID)
 	if err != nil {
+		m.errorTracker.Report(ctx, err)
 		return nil, nil, err
 	}
 
@@ -89,6 +93,7 @@ func (m *PaymentAccountManager) CheckOwner(ctx context.Context, user *platform.U
 		if err == qrm.ErrNoRows {
 			return ErrAccountNotFound
 		}
+		m.errorTracker.Report(ctx, err)
 		return err
 	}
 
@@ -101,7 +106,13 @@ func (m *PaymentAccountManager) GetBalance(ctx context.Context, account *platfor
 		return nil, ErrPaymentServiceNotSupported
 	}
 
-	return service.Balance(ctx, account)
+	balance, err := service.Balance(ctx, account)
+	if err != nil {
+		m.errorTracker.Report(ctx, err)
+		return nil, err
+	}
+
+	return balance, nil
 }
 
 func (m *PaymentAccountManager) Register(ctx context.Context, user *platform.User, serviceID string, name string, accountForeignID string, CallbackData string) (*platform.PaymentAccount, error) {
@@ -112,11 +123,13 @@ func (m *PaymentAccountManager) Register(ctx context.Context, user *platform.Use
 
 	err := service.Validate(ctx, user, accountForeignID, CallbackData)
 	if err != nil {
+		m.errorTracker.Report(ctx, err)
 		return nil, err
 	}
 
 	uuid, err := uuid.NewV7()
 	if err != nil {
+		m.errorTracker.Report(ctx, err)
 		return nil, err
 	}
 

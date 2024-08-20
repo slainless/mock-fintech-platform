@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-jet/jet/v2/qrm"
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
 
@@ -31,9 +30,6 @@ func (m *AuthManager) Validate(ctx context.Context, service platform.AuthService
 
 	user, err := m.UserManager.GetUserByEmail(ctx, email)
 	if err != nil {
-		if err == qrm.ErrNoRows {
-			return nil, ErrUserNotRegistered
-		}
 		return nil, err
 	}
 

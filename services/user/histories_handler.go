@@ -17,7 +17,6 @@ func (s *Service) histories() gin.HandlerFunc {
 		histories, err := s.historyManager.GetHistories(c, user, accountUUID, *from, *to)
 		if err != nil {
 			c.String(500, "Failed to get histories")
-			s.errorTracker.Report(c, err)
 			return
 		}
 

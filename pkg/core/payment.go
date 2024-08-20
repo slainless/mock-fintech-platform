@@ -42,6 +42,7 @@ func (m *PaymentManager) Send(ctx context.Context, from, to *platform.PaymentAcc
 
 	sourceHistory, err := service.Send(ctx, from, to, amount)
 	if err != nil {
+		m.errorTracker.Report(ctx, err)
 		return nil, err
 	}
 
@@ -49,14 +50,12 @@ func (m *PaymentManager) Send(ctx context.Context, from, to *platform.PaymentAcc
 	destHistory, err = service.GetMatchingHistory(ctx, to, sourceHistory)
 	if err != nil {
 		m.errorTracker.Report(ctx, err)
-		m.errorTracker.Report(ctx,
-			m.historyManager.Records(ctx, []platform.TransactionHistory{*sourceHistory}))
+		m.historyManager.Records(ctx, []platform.TransactionHistory{*sourceHistory})
 	} else {
-		m.errorTracker.Report(ctx,
-			m.historyManager.Records(ctx, []platform.TransactionHistory{
-				*sourceHistory,
-				*destHistory,
-			}))
+		m.historyManager.Records(ctx, []platform.TransactionHistory{
+			*sourceHistory,
+			*destHistory,
+		})
 	}
 
 	return sourceHistory, nil
@@ -70,11 +69,11 @@ func (m *PaymentManager) Withdraw(ctx context.Context, from *platform.PaymentAcc
 
 	history, err := service.Withdraw(ctx, from, amount, callbackData)
 	if err != nil {
+		m.errorTracker.Report(ctx, err)
 		return nil, err
 	}
 
-	m.errorTracker.Report(ctx,
-		m.historyManager.Records(ctx, []platform.TransactionHistory{*history}))
+	m.historyManager.Records(ctx, []platform.TransactionHistory{*history})
 
 	return history, nil
 }

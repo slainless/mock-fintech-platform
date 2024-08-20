@@ -35,7 +35,6 @@ func (s *Service) withdraw() gin.HandlerFunc {
 			case errors.Is(err, core.ErrAccountNotFound):
 				c.String(400, err.Error())
 			default:
-				s.errorTracker.Report(c, err)
 				c.String(500, "Failed to get account")
 			}
 			return
@@ -53,7 +52,6 @@ func (s *Service) withdraw() gin.HandlerFunc {
 				c.String(501, err.Error())
 			default:
 				c.String(500, "Failed to withdraw")
-				s.errorTracker.Report(c, err)
 			}
 			return
 		}

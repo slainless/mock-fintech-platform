@@ -12,20 +12,33 @@ import (
 
 type TransactionHistoryManager struct {
 	db *sql.DB
+
+	errorTracker platform.ErrorTracker
 }
 
-func NewTransactionHistoryManager(db *sql.DB) *TransactionHistoryManager {
+func NewTransactionHistoryManager(db *sql.DB, errorTracker platform.ErrorTracker) *TransactionHistoryManager {
 	return &TransactionHistoryManager{
 		db: db,
+
+		errorTracker: errorTracker,
 	}
 }
 
 func (m *TransactionHistoryManager) GetHistories(ctx context.Context, user *platform.User, accountUUID string, from, to time.Time) ([]platform.TransactionHistory, error) {
+	var histories []platform.TransactionHistory
+	var err error
 	if accountUUID != "" {
-		return query.GetHistoriesOfAccount(ctx, m.db, accountUUID, from, to)
+		histories, err = query.GetHistoriesOfAccount(ctx, m.db, accountUUID, from, to)
 	} else {
-		return query.GetHistories(ctx, m.db, user.UUID, from, to)
+		histories, err = query.GetHistories(ctx, m.db, user.UUID, from, to)
 	}
+
+	if err != nil {
+		m.errorTracker.Report(ctx, err)
+		return nil, err
+	}
+
+	return histories, nil
 }
 
 type HistoryParams struct {
@@ -54,6 +67,7 @@ func (m *TransactionHistoryManager) GetHistoryParams(ctx *gin.Context) (*time.Ti
 func (m *TransactionHistoryManager) Records(ctx context.Context, histories []platform.TransactionHistory) error {
 	err := query.InsertHistories(ctx, m.db, histories)
 	if err != nil {
+		m.errorTracker.Report(ctx, err)
 		return err
 	}
 
