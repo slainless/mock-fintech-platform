@@ -1,7 +1,10 @@
 package user
 
 import (
+	"errors"
+
 	"github.com/gin-gonic/gin"
+	"github.com/slainless/mock-fintech-platform/pkg/core"
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
 
@@ -14,7 +17,23 @@ func (s *Service) histories() gin.HandlerFunc {
 		user := s.authManager.GetUser(c)
 
 		from, to, accountUUID := s.historyManager.GetHistoryParams(c)
-		histories, err := s.historyManager.GetHistories(c, user, accountUUID, *from, *to)
+		var account *platform.PaymentAccount
+		if accountUUID != "" {
+			acc, err := s.accountManager.GetAccountWhereUser(c, user, accountUUID)
+			if err != nil {
+				switch {
+				case errors.Is(err, core.ErrAccountNotFound):
+					c.String(400, core.ErrAccountNotFound.Error())
+				default:
+					c.String(500, "Failed to get account")
+				}
+				return
+			}
+
+			account = acc
+		}
+
+		histories, err := s.historyManager.GetHistories(c, user, account, *from, *to)
 		if err != nil {
 			c.String(500, "Failed to get histories")
 			return

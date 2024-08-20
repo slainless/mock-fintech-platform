@@ -24,11 +24,9 @@ func NewTransactionHistoryManager(db *sql.DB, errorTracker platform.ErrorTracker
 	}
 }
 
-func (m *TransactionHistoryManager) GetHistories(ctx context.Context, user *platform.User, accountUUID string, from, to time.Time) ([]platform.TransactionHistory, error) {
-	var histories []platform.TransactionHistory
-	var err error
-	if accountUUID != "" {
-		histories, err = query.GetHistoriesOfAccount(ctx, m.db, accountUUID, from, to)
+func (m *TransactionHistoryManager) GetHistories(ctx context.Context, user *platform.User, account *platform.PaymentAccount, from, to time.Time) (histories []platform.TransactionHistory, err error) {
+	if account != nil {
+		histories, err = query.GetHistoriesOfAccount(ctx, m.db, account.UUID, from, to)
 	} else {
 		histories, err = query.GetHistories(ctx, m.db, user.UUID, from, to)
 	}
