@@ -22,7 +22,7 @@
 - Clone the repository
 - Obtain your 3rd party JWT auth secret
 - Copy .env.example to .env
-- Fill AUTH_SECRET with your 3rd party JWT auth secret
+- Fill `AUTH_SECRET` with your 3rd party JWT auth secret
 - Change directory into the repository root
 - Run `docker compose up`
 - Use your 3rd party token to test the API
@@ -48,8 +48,8 @@ For detailed usage, please continue reading...
 
 #### JWT Secret
 
-Currently, this project's authentication is pretty agnostic since all it does is verify token and obtain
-email it. Meaning, you can use 3rd party authentication services such as Supertoken or Supabase 
+Currently, this project's authentication is pretty agnostic since all it does is verify token and obtain its
+email. Meaning, you can use 3rd party authentication services such as Supertoken or Supabase 
 (as how it is intended for) or you can spin your own key and issue your own token.
 
 To integrate with 3rd party authentication, all it takes is copying secret from auth services
@@ -247,7 +247,7 @@ For example, [`AuthManager`](./pkg/core/auth.go) acts as driver for [`AuthServic
 There is also [`PaymentManager`](./pkg/core/payment.go) that acts as the driver for [`PaymentService`](./pkg/platform/payment_service.go) while borrowing [`PaymentAccountManager`](./pkg/core/payment_account.go) to handles user's payment account and [`TransactionHistoryManager`](./pkg/core/transaction_history.go)
 to store transaction history.
 
-Even the main microservices `cmd/user` and `cmd/payment` is using these pattern to serve REST API. For example, 
+Even the main microservices `cmd/user` and `cmd/payment` are using these pattern. For example, 
 [`payment.Service`](./services/payment/service.go) is using multiple managers to do its job. 
 
 Another microservices can easily be set up by only composing essential managers.
@@ -303,8 +303,14 @@ This project does 2 step generations:
 - [`versiongen`](./scripts/versiongen.sh): Generate VERSION at specified dir, outputting to it the latest repo's tag.
   This is not version controlled.
 - [`jetgen`](./scripts/jetgen.sh): Generate `jet` database reflection to Go, outputting it to [artifact directory](./pkg/internal/artifact/database). This is version controlled.
+- [`swaggen`](./scripts/swaggen.sh): Generate Swagger documentations.
 
-Only `versiongen` is dispatched in docker compose. `jetgen` are meant to be ran in development.
+Only `versiongen` is dispatched in docker compose. `jetgen` and `swaggen` are meant to be ran in development.
+
+### Swagger documents
+
+This project is using [gin-swagger](https://github.com/swaggo/gin-swagger) to generate swagger documentations. Project's swagger definition can be
+seen in each service's `swag.go` file. For example, payment [swag.go](./services/payment/swag.go).
 
 ### Internal database query
 
