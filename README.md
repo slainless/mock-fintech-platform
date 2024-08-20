@@ -12,6 +12,30 @@
 - Instant start stack with `docker compose up`
 - Extensible service integration via provided interfaces
 - Gin as web framework
+- Swagger documentations
+
+## Quickstart
+
+### How to start
+
+- Clone the repository
+- Change directory into the repository root
+- Run `docker compose up`
+
+### Swagger
+
+- User API: http://localhost:8080/swagger/index.html
+- Payment API: http://localhost:8081/swagger/index.html
+
+### Exposed ports
+
+- 7777: PGAdmin4
+- 8080: Account manager service
+- 8081: Transaction manager service
+
+---
+
+For detailed usage, please continue reading...
 
 ## Production usage
 
