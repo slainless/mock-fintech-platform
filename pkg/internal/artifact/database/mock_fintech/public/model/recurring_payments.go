@@ -12,10 +12,12 @@ import (
 )
 
 type RecurringPayments struct {
-	ID            int32
-	UUID          string
-	ServiceID     string
-	AccountUUID   string
-	SchedulerType int16
-	LastCharge    *time.Time
+	ID             int32
+	UUID           string
+	ServiceID      string
+	AccountUUID    string
+	SchedulerType  int16
+	LastCharge     *time.Time
+	ForeignID      string
+	ChargingMethod int16
 }

@@ -26,17 +26,22 @@ type Service struct {
 func NewService(
 	authSecret string,
 	db *sql.DB,
-	services map[string]platform.PaymentService,
+	paymentServices map[string]platform.PaymentService,
+	recurringPaymentServices map[string]platform.RecurringPaymentService,
 	tracker platform.ErrorTracker,
 ) *Service {
 	emailJwtAuth := auth.NewEmailJWTAuthService([]byte(authSecret))
 
 	user := core.NewUserManager(db, tracker)
 	auth := core.NewAuthManager(user)
-	account := core.NewPaymentAccountManager(db, services, tracker)
+	account := core.NewPaymentAccountManager(db, paymentServices, tracker)
 	history := core.NewTransactionHistoryManager(db, tracker)
-	recurringPayment := core.NewRecurringPaymentManager(db, tracker)
-	payment := core.NewPaymentManager(account, history, services, tracker)
+	recurringPayment, err := core.NewRecurringPaymentManager(db, recurringPaymentServices, history, tracker)
+	if err != nil {
+		tracker.Report(nil, err)
+		panic(err)
+	}
+	payment := core.NewPaymentManager(account, history, paymentServices, tracker)
 
 	return &Service{
 		db: db,

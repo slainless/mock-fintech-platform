@@ -8,4 +8,6 @@ func (s *Service) Mount(r gin.IRouter) {
 
 	my.POST("/send", s.send())
 	my.POST("/withdraw", s.withdraw())
+	my.POST("/subscribe", s.subscribe())
+	my.POST("/unsubscribe", s.unsubscribe())
 }
