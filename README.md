@@ -13,6 +13,7 @@
 - Extensible service integration via provided interfaces
 - Gin as web framework
 - Swagger documentations
+- Auto-debit/Recurring payments (No services implemented yet, only interfaces)
 
 ## Quickstart
 
