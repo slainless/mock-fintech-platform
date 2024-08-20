@@ -56,8 +56,8 @@ func (m *PaymentAccountManager) GetAccount(ctx context.Context, accountUUID stri
 	return account, nil
 }
 
-func (m *PaymentAccountManager) GetAccountWhereUser(ctx context.Context, userUUID, accountUUID string) (*platform.PaymentAccount, error) {
-	account, err := query.GetAccountWhereUser(ctx, m.db, userUUID, accountUUID)
+func (m *PaymentAccountManager) GetAccountWhereUser(ctx context.Context, user *platform.User, accountUUID string) (*platform.PaymentAccount, error) {
+	account, err := query.GetAccountWhereUser(ctx, m.db, user.UUID, accountUUID)
 	if err != nil {
 		if err == qrm.ErrNoRows {
 			return nil, ErrAccountNotFound

@@ -29,7 +29,7 @@ func (s *Service) withdraw() gin.HandlerFunc {
 			return
 		}
 
-		account, err := s.accountManager.GetAccountWhereUser(c, user.UUID, withdraw.AccountUUID)
+		account, err := s.accountManager.GetAccountWhereUser(c, user, withdraw.AccountUUID)
 		if err != nil {
 			switch {
 			case errors.Is(err, core.ErrAccountNotFound):
