@@ -28,7 +28,7 @@ func (s *Service) unsubscribe() gin.HandlerFunc {
 			return
 		}
 
-		payment, err := s.recurringPaymentManager.GetPaymentWithAccess(c, user, uuid.MustParse(payload.PaymentUUID), core.AccountPermissionSubscription)
+		payment, err := s.recurringPaymentManager.GetPaymentWithAccess(c, user, uuid.MustParse(payload.PaymentUUID))
 		if err != nil {
 			switch {
 			case errors.Is(err, core.ErrRecurringPaymentNotFound):

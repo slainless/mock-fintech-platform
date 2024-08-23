@@ -196,8 +196,8 @@ func (m *RecurringPaymentManager) GetPayment(ctx context.Context, uuid uuid.UUID
 	return payment, nil
 }
 
-func (m *RecurringPaymentManager) GetPaymentWithAccess(ctx context.Context, user *platform.User, uuid uuid.UUID, access AccountPermission) (*platform.RecurringPayment, error) {
-	payment, err := query.GetRecurringPaymentWithAccess(ctx, m.db, user.UUID, uuid, access)
+func (m *RecurringPaymentManager) GetPaymentWithAccess(ctx context.Context, user *platform.User, uuid uuid.UUID) (*platform.RecurringPayment, error) {
+	payment, err := query.GetRecurringPaymentWithAccess(ctx, m.db, user.UUID, uuid, AccountPermissionSubscription)
 	if err != nil {
 		if err == qrm.ErrNoRows {
 			return nil, ErrRecurringPaymentNotFound

@@ -57,8 +57,8 @@ func (*MockPaymentService) Send(ctx context.Context, user *platform.User, source
 				TransactionDate: time.Now(),
 				IssuerUUID:      &user.UUID,
 			},
-			ServiceUUID: source.ServiceID,
-			UserUUID:    source.UserUUID,
+			ServiceID: source.ServiceID,
+			UserUUID:  source.UserUUID,
 		}, nil
 	}
 }
@@ -88,8 +88,8 @@ func (*MockPaymentService) Withdraw(ctx context.Context, user *platform.User, ac
 				TransactionDate: time.Now(),
 				IssuerUUID:      &user.UUID,
 			},
-			ServiceUUID: account.ServiceID,
-			UserUUID:    account.UserUUID,
+			ServiceID: account.ServiceID,
+			UserUUID:  account.UserUUID,
 		}, nil
 	}
 }

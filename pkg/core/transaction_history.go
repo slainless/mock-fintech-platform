@@ -26,9 +26,9 @@ func NewTransactionHistoryManager(db *sql.DB, errorTracker platform.ErrorTracker
 
 func (m *TransactionHistoryManager) GetHistories(ctx context.Context, user *platform.User, account *platform.PaymentAccount, from, to time.Time) (histories []platform.TransactionHistory, err error) {
 	if account != nil {
-		histories, err = query.GetHistoriesOfAccount(ctx, m.db, account.UUID, from, to)
+		histories, err = query.GetHistoriesOfAccountWithAccess(ctx, m.db, user.UUID, account.UUID, from, to, AccountPermissionHistory)
 	} else {
-		histories, err = query.GetHistories(ctx, m.db, user.UUID, from, to)
+		histories, err = query.GetHistoriesWithAccess(ctx, m.db, user.UUID, from, to, AccountPermissionHistory)
 	}
 
 	if err != nil {
