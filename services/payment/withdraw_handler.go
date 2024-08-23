@@ -46,7 +46,7 @@ func (s *Service) withdraw() gin.HandlerFunc {
 			return
 		}
 
-		history, err := s.paymentManager.Withdraw(c, account, withdraw.Amount, withdraw.CallbackData)
+		history, err := s.paymentManager.Withdraw(c, user, account, withdraw.Amount, withdraw.CallbackData)
 		if err != nil {
 			switch {
 			case errors.Is(err, core.ErrPaymentServiceNotSupported):

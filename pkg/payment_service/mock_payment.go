@@ -26,7 +26,8 @@ func (s *MockPaymentService) Balance(ctx context.Context, account *platform.Paym
 // GetMatchingHistory implements platform.PaymentService.
 func (*MockPaymentService) GetMatchingHistory(ctx context.Context, account *platform.PaymentAccount, history *platform.TransactionHistory) (*platform.TransactionHistory, error) {
 	util.MockSleep(2 * time.Second)
-	if util.LeaveItToRNG() {
+	// let us always receive the matching history...
+	if util.LeaveItToRNG() && false {
 		return nil, errors.New("Oops! Failed to get matching history")
 	} else {
 		note := "Received from " + account.UserUUID.String()
@@ -41,7 +42,7 @@ func (*MockPaymentService) GetMatchingHistory(ctx context.Context, account *plat
 }
 
 // Send implements platform.PaymentService.
-func (*MockPaymentService) Send(ctx context.Context, source *platform.PaymentAccount, des *platform.PaymentAccount, amount int64) (*platform.TransactionHistory, error) {
+func (*MockPaymentService) Send(ctx context.Context, user *platform.User, source *platform.PaymentAccount, des *platform.PaymentAccount, amount int64) (*platform.TransactionHistory, error) {
 	util.MockSleep(3 * time.Second)
 	if util.LeaveItToRNG() {
 		return nil, errors.New("Failed to send money")
@@ -54,6 +55,7 @@ func (*MockPaymentService) Send(ctx context.Context, source *platform.PaymentAcc
 				Mutation:        amount * -1,
 				Currency:        "USD",
 				TransactionDate: time.Now(),
+				IssuerUUID:      &user.UUID,
 			},
 			ServiceUUID: source.ServiceID,
 			UserUUID:    source.UserUUID,
@@ -72,7 +74,7 @@ func (*MockPaymentService) Validate(ctx context.Context, user *platform.User, ac
 }
 
 // Withdraw implements platform.PaymentService.
-func (*MockPaymentService) Withdraw(ctx context.Context, account *platform.PaymentAccount, amount int64, callbackData string) (*platform.TransactionHistory, error) {
+func (*MockPaymentService) Withdraw(ctx context.Context, user *platform.User, account *platform.PaymentAccount, amount int64, callbackData string) (*platform.TransactionHistory, error) {
 	util.MockSleep(2 * time.Second)
 	if util.LeaveItToRNG() {
 		return nil, errors.New("Failed to withdraw money")
@@ -84,6 +86,7 @@ func (*MockPaymentService) Withdraw(ctx context.Context, account *platform.Payme
 				Mutation:        amount * -1,
 				Currency:        "USD",
 				TransactionDate: time.Now(),
+				IssuerUUID:      &user.UUID,
 			},
 			ServiceUUID: account.ServiceID,
 			UserUUID:    account.UserUUID,

@@ -63,7 +63,7 @@ func (s *Service) send() gin.HandlerFunc {
 			return
 		}
 
-		history, err := s.paymentManager.Send(c, from, to, send.Amount)
+		history, err := s.paymentManager.Send(c, user, from, to, send.Amount)
 		if err != nil {
 			switch err {
 			case core.ErrPaymentServiceNotSupported:
