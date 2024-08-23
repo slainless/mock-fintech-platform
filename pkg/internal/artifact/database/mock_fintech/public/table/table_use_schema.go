@@ -13,6 +13,7 @@ func UseSchema(schema string) {
 	PaymentAccounts = PaymentAccounts.FromSchema(schema)
 	RecurringPayments = RecurringPayments.FromSchema(schema)
 	SchemaMigrations = SchemaMigrations.FromSchema(schema)
+	SharedOwnership = SharedOwnership.FromSchema(schema)
 	TransactionHistories = TransactionHistories.FromSchema(schema)
 	Users = Users.FromSchema(schema)
 }
