@@ -4,4 +4,5 @@ import "github.com/slainless/mock-fintech-platform/pkg/internal/artifact/databas
 
 type PaymentAccount struct {
 	model.PaymentAccounts
+	Permission int16
 }

@@ -14,8 +14,20 @@ import (
 )
 
 var ErrInvalidTransferDestination = errors.New("invalid transfer destination")
-var ErrAccountNotFound = errors.New("account not found")
+var ErrAccountNotFound = errors.New("account not found or no permission")
 var ErrAccountAlreadyRegistered = errors.New("account already registered")
+
+type AccountPermission = query.AccountPermission
+
+const (
+	AccountPermissionBase         = query.AccountPermissionBase
+	AccountPermissionRead         = query.AccountPermissionRead
+	AccountPermissionHistory      = query.AccountPermissionHistory
+	AccountPermissionSend         = query.AccountPermissionSend
+	AccountPermissionWithdraw     = query.AccountPermissionWithdraw
+	AccountPermissionSubscription = query.AccountPermissionSubscription
+	AccountPermissionAll          = query.AccountPermissionAll
+)
 
 type PaymentAccountManager struct {
 	services     map[string]platform.PaymentService
@@ -33,8 +45,8 @@ func NewPaymentAccountManager(db *sql.DB, svc map[string]platform.PaymentService
 	}
 }
 
-func (m *PaymentAccountManager) GetAccounts(ctx context.Context, user *platform.User) ([]platform.PaymentAccount, error) {
-	accounts, err := query.GetAllAccounts(ctx, m.db, user.UUID)
+func (m *PaymentAccountManager) GetAccountsWithAccess(ctx context.Context, user *platform.User, access AccountPermission) ([]platform.PaymentAccount, error) {
+	accounts, err := query.GetAllAccountsWithAccess(ctx, m.db, user.UUID, access)
 	if err != nil {
 		m.errorTracker.Report(ctx, err)
 		return nil, err
@@ -56,8 +68,8 @@ func (m *PaymentAccountManager) GetAccount(ctx context.Context, accountUUID uuid
 	return account, nil
 }
 
-func (m *PaymentAccountManager) GetAccountWhereUser(ctx context.Context, user *platform.User, accountUUID uuid.UUID) (*platform.PaymentAccount, error) {
-	account, err := query.GetAccountWhereUser(ctx, m.db, user.UUID, accountUUID)
+func (m *PaymentAccountManager) GetAccountWithAccess(ctx context.Context, user *platform.User, accountUUID uuid.UUID, access AccountPermission) (*platform.PaymentAccount, error) {
+	account, err := query.GetAccountWithAccess(ctx, m.db, user.UUID, accountUUID, access)
 	if err != nil {
 		if err == qrm.ErrNoRows {
 			return nil, ErrAccountNotFound
@@ -67,24 +79,6 @@ func (m *PaymentAccountManager) GetAccountWhereUser(ctx context.Context, user *p
 	}
 
 	return account, nil
-}
-
-func (m *PaymentAccountManager) PrepareTransfer(ctx context.Context, fromUUID, toUUID uuid.UUID) (*platform.PaymentAccount, *platform.PaymentAccount, error) {
-	from, to, err := query.GetTwoAccounts(ctx, m.db, fromUUID, toUUID)
-	if err != nil {
-		m.errorTracker.Report(ctx, err)
-		return nil, nil, err
-	}
-
-	if from == nil {
-		return nil, nil, ErrAccountNotFound
-	}
-
-	if to == nil {
-		return nil, nil, ErrInvalidTransferDestination
-	}
-
-	return from, to, nil
 }
 
 func (m *PaymentAccountManager) CheckOwner(ctx context.Context, user *platform.User, accountUUID uuid.UUID) error {

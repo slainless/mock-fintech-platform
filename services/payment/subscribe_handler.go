@@ -31,7 +31,7 @@ func (s *Service) subscribe() gin.HandlerFunc {
 			return
 		}
 
-		account, err := s.accountManager.GetAccountWhereUser(c, user, uuid.MustParse(payload.AccountUUID))
+		account, err := s.accountManager.GetAccountWithAccess(c, user, uuid.MustParse(payload.AccountUUID), core.AccountPermissionSubscription)
 		if err != nil {
 			switch {
 			case errors.Is(err, core.ErrAccountNotFound):

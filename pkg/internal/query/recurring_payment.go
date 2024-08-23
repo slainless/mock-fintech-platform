@@ -24,16 +24,22 @@ func GetRecurringPayment(ctx context.Context, db *sql.DB, uuid uuid.UUID) (*plat
 	return &account, nil
 }
 
-func GetRecurringPaymentWhereUser(ctx context.Context, db *sql.DB, userUUID, uuid uuid.UUID) (*platform.RecurringPayment, error) {
+func GetRecurringPaymentWithAccess(ctx context.Context, db *sql.DB, userUUID, uuid uuid.UUID, access AccountPermission) (*platform.RecurringPayment, error) {
 	stmt := SELECT(table.RecurringPayments.AllColumns).
 		FROM(
 			table.RecurringPayments.
-				INNER_JOIN(table.PaymentAccounts, table.PaymentAccounts.UUID.EQ(table.RecurringPayments.AccountUUID)),
+				INNER_JOIN(table.PaymentAccounts, table.PaymentAccounts.UUID.EQ(table.RecurringPayments.AccountUUID)).
+				INNER_JOIN(table.SharedAccountAccess, table.RecurringPayments.AccountUUID.EQ(table.SharedAccountAccess.AccountUUID)),
 		).
 		WHERE(
-			table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)).
-				AND(table.RecurringPayments.UUID.EQ(UUID(uuid))),
-		)
+			table.RecurringPayments.UUID.EQ(UUID(uuid)).
+				AND(OR(
+					table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)),
+					table.SharedAccountAccess.UserUUID.EQ(UUID(userUUID)).
+						AND(table.SharedAccountAccess.Permission.BIT_AND(Int16(int16(access))).EQ(Int16(int16(access)))),
+				)),
+		).
+		GROUP_BY(table.RecurringPayments.UUID)
 
 	var account platform.RecurringPayment
 	err := stmt.QueryContext(ctx, db, &account)

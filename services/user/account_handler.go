@@ -24,7 +24,7 @@ func (s *Service) account() gin.HandlerFunc {
 			return
 		}
 
-		account, err := s.accountManager.GetAccountWhereUser(c, user, accountUUID)
+		account, err := s.accountManager.GetAccountWithAccess(c, user, accountUUID, core.AccountPermissionRead)
 		if err != nil {
 			switch {
 			case errors.Is(err, core.ErrAccountNotFound):

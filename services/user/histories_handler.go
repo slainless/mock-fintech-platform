@@ -20,7 +20,7 @@ func (s *Service) histories() gin.HandlerFunc {
 		from, to, accountUUID := s.historyManager.GetHistoryParams(c)
 		var account *platform.PaymentAccount
 		if accountUUID != "" {
-			acc, err := s.accountManager.GetAccountWhereUser(c, user, uuid.MustParse(accountUUID))
+			acc, err := s.accountManager.GetAccountWithAccess(c, user, uuid.MustParse(accountUUID), core.AccountPermissionHistory)
 			if err != nil {
 				switch {
 				case errors.Is(err, core.ErrAccountNotFound):
@@ -34,6 +34,7 @@ func (s *Service) histories() gin.HandlerFunc {
 			account = acc
 		}
 
+		// TODO: introduce atomicity to this operation
 		histories, err := s.historyManager.GetHistories(c, user, account, *from, *to)
 		if err != nil {
 			c.String(500, "Failed to get histories")

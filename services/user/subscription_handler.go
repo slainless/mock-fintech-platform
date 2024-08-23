@@ -29,7 +29,7 @@ func (s *Service) subscription() gin.HandlerFunc {
 
 		var account *platform.PaymentAccount
 		if params.AccountUUID != nil {
-			account, err = s.accountManager.GetAccountWhereUser(c, user, uuid.MustParse(*params.AccountUUID))
+			account, err = s.accountManager.GetAccountWithAccess(c, user, uuid.MustParse(*params.AccountUUID), core.AccountPermissionRead)
 			if err != nil {
 				switch {
 				case errors.Is(err, core.ErrAccountNotFound):

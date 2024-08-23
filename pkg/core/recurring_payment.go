@@ -16,7 +16,7 @@ import (
 var (
 	ErrRecurringPaymentServiceNotSupported = errors.New("recurring payment service not supported")
 	ErrRecurringPaymentServiceInvalidType  = errors.New("recurring payment service invalid type")
-	ErrRecurringPaymentNotFound            = errors.New("recurring payment not found")
+	ErrRecurringPaymentNotFound            = errors.New("recurring payment not found or no permission")
 )
 
 type RecurringPaymentManager struct {
@@ -196,8 +196,8 @@ func (m *RecurringPaymentManager) GetPayment(ctx context.Context, uuid uuid.UUID
 	return payment, nil
 }
 
-func (m *RecurringPaymentManager) GetPaymentWhereUser(ctx context.Context, user *platform.User, uuid uuid.UUID) (*platform.RecurringPayment, error) {
-	payment, err := query.GetRecurringPaymentWhereUser(ctx, m.db, user.UUID, uuid)
+func (m *RecurringPaymentManager) GetPaymentWithAccess(ctx context.Context, user *platform.User, uuid uuid.UUID, access AccountPermission) (*platform.RecurringPayment, error) {
+	payment, err := query.GetRecurringPaymentWithAccess(ctx, m.db, user.UUID, uuid, access)
 	if err != nil {
 		if err == qrm.ErrNoRows {
 			return nil, ErrRecurringPaymentNotFound

@@ -10,10 +10,35 @@ import (
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
 
-func GetAllAccounts(ctx context.Context, db *sql.DB, userUUID uuid.UUID) ([]platform.PaymentAccount, error) {
-	stmt := SELECT(table.PaymentAccounts.AllColumns).
-		FROM(table.PaymentAccounts).
-		WHERE(table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)))
+type AccountPermission int16
+
+const (
+	AccountPermissionBase         AccountPermission = 0b00000
+	AccountPermissionRead         AccountPermission = 0b00001
+	AccountPermissionHistory      AccountPermission = 0b00010
+	AccountPermissionWithdraw     AccountPermission = 0b00100
+	AccountPermissionSend         AccountPermission = 0b01000
+	AccountPermissionSubscription AccountPermission = 0b10000
+	AccountPermissionAll          AccountPermission = 0b11111
+)
+
+func GetAllAccountsWithAccess(ctx context.Context, db *sql.DB, userUUID uuid.UUID, access AccountPermission) ([]platform.PaymentAccount, error) {
+	stmt := SELECT(
+		table.PaymentAccounts.AllColumns,
+		COALESCE(table.SharedAccountAccess.Permission, Int16(int16(AccountPermissionAll))).AS("Permission"),
+	).
+		FROM(
+			table.PaymentAccounts.
+				LEFT_JOIN(table.SharedAccountAccess, table.PaymentAccounts.UUID.EQ(table.SharedAccountAccess.AccountUUID)),
+		).
+		WHERE(
+			table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)).
+				OR(
+					table.SharedAccountAccess.UserUUID.EQ(UUID(userUUID)).
+						AND(table.SharedAccountAccess.Permission.BIT_AND(Int16(int16(access))).EQ(Int16(int16(access)))),
+				),
+		).
+		GROUP_BY(table.PaymentAccounts.UUID)
 
 	accounts := make([]platform.PaymentAccount, 0)
 	err := stmt.QueryContext(ctx, db, &accounts)
@@ -38,13 +63,24 @@ func GetAccount(ctx context.Context, db *sql.DB, accountUUID uuid.UUID) (*platfo
 	return &account, nil
 }
 
-func GetAccountWhereUser(ctx context.Context, db *sql.DB, userUUID, accountUUID uuid.UUID) (*platform.PaymentAccount, error) {
-	stmt := SELECT(table.PaymentAccounts.AllColumns).
-		FROM(table.PaymentAccounts).
+func GetAccountWithAccess(ctx context.Context, db *sql.DB, userUUID, accountUUID uuid.UUID, access AccountPermission) (*platform.PaymentAccount, error) {
+	stmt := SELECT(
+		table.PaymentAccounts.AllColumns,
+		COALESCE(table.SharedAccountAccess.Permission, Int16(int16(AccountPermissionAll))).AS("Permission"),
+	).
+		FROM(
+			table.PaymentAccounts.
+				LEFT_JOIN(table.SharedAccountAccess, table.PaymentAccounts.UUID.EQ(table.SharedAccountAccess.AccountUUID)),
+		).
 		WHERE(
-			table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)).
-				AND(table.PaymentAccounts.UUID.EQ(UUID(accountUUID))),
-		)
+			table.PaymentAccounts.UUID.EQ(UUID(accountUUID)).
+				AND(OR(
+					table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)),
+					table.SharedAccountAccess.UserUUID.EQ(UUID(userUUID)).
+						AND(table.SharedAccountAccess.Permission.BIT_AND(Int16(int16(access))).EQ(Int16(int16(access)))),
+				)),
+		).
+		GROUP_BY(table.PaymentAccounts.UUID)
 
 	var account platform.PaymentAccount
 	err := stmt.QueryContext(ctx, db, &account)

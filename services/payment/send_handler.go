@@ -41,7 +41,7 @@ func (s *Service) send() gin.HandlerFunc {
 		sourceUUID := uuid.MustParse(send.AccountUUID)
 		destUUID := uuid.MustParse(send.DestUUID)
 
-		err = s.accountManager.CheckOwner(c, user, sourceUUID)
+		from, err := s.accountManager.GetAccountWithAccess(c, user, sourceUUID, core.AccountPermissionSend)
 		if err != nil {
 			switch err {
 			case core.ErrAccountNotFound:
@@ -52,13 +52,13 @@ func (s *Service) send() gin.HandlerFunc {
 			return
 		}
 
-		from, to, err := s.accountManager.PrepareTransfer(c, sourceUUID, destUUID)
+		to, err := s.accountManager.GetAccount(c, destUUID)
 		if err != nil {
 			switch err {
-			case core.ErrAccountNotFound, core.ErrInvalidTransferDestination:
-				c.String(400, err.Error())
+			case core.ErrAccountNotFound:
+				c.String(400, core.ErrInvalidTransferDestination.Error())
 			default:
-				c.String(500, "Failed to prepare transfer")
+				c.String(500, "Failed to get destination account")
 			}
 			return
 		}
