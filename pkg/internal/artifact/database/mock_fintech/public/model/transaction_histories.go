@@ -23,4 +23,5 @@ type TransactionHistories struct {
 	TransactionNote *string
 	TransactionDate time.Time
 	TransactionType int16
+	IssuerUUID      *uuid.UUID
 }

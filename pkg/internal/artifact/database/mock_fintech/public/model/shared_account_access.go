@@ -11,8 +11,8 @@ import (
 	"github.com/google/uuid"
 )
 
-type SharedOwnership struct {
+type SharedAccountAccess struct {
 	AccountUUID uuid.UUID `sql:"primary_key"`
 	UserUUID    uuid.UUID `sql:"primary_key"`
-	Status      int16
+	Permission  int32
 }
