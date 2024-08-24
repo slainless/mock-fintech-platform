@@ -41,11 +41,6 @@ func (s *Service) withdraw() gin.HandlerFunc {
 			return
 		}
 
-		if account.UserUUID != user.UUID {
-			c.String(400, core.ErrAccountNotFound.Error())
-			return
-		}
-
 		history, err := s.paymentManager.Withdraw(c, user, account, withdraw.Amount, withdraw.CallbackData)
 		if err != nil {
 			switch {
