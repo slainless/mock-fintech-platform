@@ -29,7 +29,7 @@ func GetRecurringPaymentWithAccess(ctx context.Context, db *sql.DB, userUUID, uu
 		FROM(
 			table.RecurringPayments.
 				INNER_JOIN(table.PaymentAccounts, table.PaymentAccounts.UUID.EQ(table.RecurringPayments.AccountUUID)).
-				INNER_JOIN(table.SharedAccountAccess, table.RecurringPayments.AccountUUID.EQ(table.SharedAccountAccess.AccountUUID)),
+				LEFT_JOIN(table.SharedAccountAccess, table.RecurringPayments.AccountUUID.EQ(table.SharedAccountAccess.AccountUUID)),
 		).
 		WHERE(
 			table.RecurringPayments.UUID.EQ(UUID(uuid)).
