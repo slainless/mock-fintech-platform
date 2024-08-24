@@ -113,7 +113,7 @@ func (m *PaymentAccountManager) GetBalance(ctx context.Context, account *platfor
 	return balance, nil
 }
 
-func (m *PaymentAccountManager) Register(ctx context.Context, user *platform.User, serviceID string, name string, accountForeignID string, CallbackData string) (*platform.PaymentAccount, error) {
+func (m *PaymentAccountManager) Register(ctx context.Context, user *platform.User, serviceID string, name string, accountForeignID string, CallbackData string) (*platform.PaymentAccountDetail, error) {
 	service := m.services[serviceID]
 	if service == nil {
 		return nil, ErrPaymentServiceNotSupported
@@ -145,7 +145,17 @@ func (m *PaymentAccountManager) Register(ctx context.Context, user *platform.Use
 		return nil, err
 	}
 
-	return account, nil
+	access := platform.SharedAccountAccess{}
+	access.AccountUUID = account.UUID
+	access.UserUUID = user.UUID
+	access.Permission = int32(AccountPermissionAll)
+
+	acc := &platform.PaymentAccountDetail{
+		PaymentAccount: *account,
+		Permissions:    []platform.SharedAccountAccess{access},
+	}
+
+	return acc, nil
 }
 
 func (m *PaymentAccountManager) ParsePermission(permission []string) (AccountPermission, error) {
@@ -203,11 +213,27 @@ func (m *PaymentAccountManager) GetAccountDetail(ctx context.Context, user *plat
 	}
 
 	if account.UserUUID == user.UUID {
+		if account.Permissions == nil || len(account.Permissions) == 0 {
+			access := platform.SharedAccountAccess{}
+			access.AccountUUID = accountUUID
+			access.UserUUID = user.UUID
+			access.Permission = int32(AccountPermissionAll)
+			account.Permissions = []platform.SharedAccountAccess{access}
+		} else {
+			for _, access := range account.Permissions {
+				if access.UserUUID == uuid.Nil {
+					access.UserUUID = user.UUID
+					access.AccountUUID = accountUUID
+					access.Permission = int32(AccountPermissionAll)
+				}
+			}
+		}
+		account.Permission = int32(AccountPermissionAll)
+	} else {
 		for _, access := range account.Permissions {
-			if access.UserUUID == uuid.Nil {
-				access.UserUUID = user.UUID
-				access.AccountUUID = accountUUID
-				access.Permission = int32(AccountPermissionAll)
+			if access.UserUUID == user.UUID {
+				account.Permission = access.Permission
+				break
 			}
 		}
 	}

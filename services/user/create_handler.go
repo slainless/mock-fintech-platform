@@ -43,20 +43,12 @@ func (s *Service) create() gin.HandlerFunc {
 			return
 		}
 
-		balance, err := s.accountManager.GetBalance(c, account)
+		balance, err := s.accountManager.GetBalance(c, &account.PaymentAccount)
 		if err != nil {
 			// c.String(500, "Failed to get account balance post-registration\nBut, don't worry, your account is successfully created")
 			return
 		}
 
-		access := platform.SharedAccountAccess{}
-		access.AccountUUID = account.UUID
-		access.UserUUID = user.UUID
-		access.Permission = int32(core.AccountPermissionAll)
-
-		c.JSON(201, AccountResponse{Account: &platform.PaymentAccountDetail{
-			PaymentAccount: *account,
-			Permissions:    []platform.SharedAccountAccess{access},
-		}, Balance: balance})
+		c.JSON(201, AccountResponse{Account: account, Balance: balance})
 	}
 }
