@@ -6,11 +6,12 @@ import (
 
 	. "github.com/go-jet/jet/v2/postgres"
 	"github.com/google/uuid"
+	"github.com/slainless/mock-fintech-platform/pkg/internal/artifact/database/mock_fintech/public/model"
 	"github.com/slainless/mock-fintech-platform/pkg/internal/artifact/database/mock_fintech/public/table"
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
 
-type AccountPermission int16
+type AccountPermission int32
 
 const (
 	AccountPermissionBase         AccountPermission = 0b00000
@@ -154,4 +155,28 @@ func InsertAccount(ctx context.Context, db *sql.DB, account *platform.PaymentAcc
 	}
 
 	return nil
+}
+
+func SetPermission(ctx context.Context, db *sql.DB, userUUID, accountUUID uuid.UUID, permission AccountPermission) error {
+	stmt := table.SharedAccountAccess.INSERT(
+		table.SharedAccountAccess.AllColumns,
+	).
+		MODEL(&model.SharedAccountAccess{
+			AccountUUID: accountUUID,
+			UserUUID:    userUUID,
+			Permission:  int32(permission),
+		}).
+		ON_CONFLICT(table.SharedAccountAccess.AccountUUID, table.SharedAccountAccess.UserUUID).
+		DO_UPDATE(
+			SET(
+				table.SharedAccountAccess.Permission.SET(table.SharedAccountAccess.EXCLUDED.Permission),
+			).
+				WHERE(
+					table.SharedAccountAccess.AccountUUID.EQ(table.SharedAccountAccess.EXCLUDED.AccountUUID).
+						AND(table.SharedAccountAccess.UserUUID.EQ(table.SharedAccountAccess.EXCLUDED.UserUUID)),
+				),
+		)
+
+	_, err := stmt.ExecContext(ctx, db)
+	return err
 }

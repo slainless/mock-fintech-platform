@@ -17,4 +17,5 @@ func (s *Service) Mount(r gin.IRouter) {
 	my.GET("/account", s.accounts())
 	my.GET("/account/:uuid", s.account())
 
+	my.PATCH("/account/:uuid/permission", s.account_permission())
 }

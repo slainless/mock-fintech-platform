@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
 
 	"github.com/go-jet/jet/v2/qrm"
 	"github.com/google/uuid"
@@ -13,9 +14,12 @@ import (
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
 
-var ErrInvalidTransferDestination = errors.New("invalid transfer destination")
-var ErrAccountNotFound = errors.New("account not found or no permission")
-var ErrAccountAlreadyRegistered = errors.New("account already registered")
+var (
+	ErrInvalidTransferDestination = errors.New("invalid transfer destination")
+	ErrAccountNotFound            = errors.New("account not found or no permission")
+	ErrAccountAlreadyRegistered   = errors.New("account already registered")
+	ErrInvalidPermission          = errors.New("invalid permission")
+)
 
 type AccountPermission = query.AccountPermission
 
@@ -142,4 +146,48 @@ func (m *PaymentAccountManager) Register(ctx context.Context, user *platform.Use
 	}
 
 	return account, nil
+}
+
+func (m *PaymentAccountManager) ParsePermission(permission []string) (AccountPermission, error) {
+	perm := AccountPermissionBase
+	for _, p := range permission {
+		switch p {
+		case "read":
+			perm |= AccountPermissionRead
+		case "history":
+			perm |= AccountPermissionHistory
+		case "send":
+			perm |= AccountPermissionSend
+		case "withdraw":
+			perm |= AccountPermissionWithdraw
+		case "subscription":
+			perm |= AccountPermissionSubscription
+		case "all":
+			perm |= AccountPermissionAll
+		default:
+			return 0, ErrInvalidPermission
+		}
+	}
+
+	return perm, nil
+}
+
+func (m *PaymentAccountManager) SetPermission(ctx context.Context, userUUID, accountUUID uuid.UUID, permission AccountPermission) error {
+	err := query.SetPermission(ctx, m.db, userUUID, accountUUID, permission)
+	if err != nil {
+		if err := util.PQError(err); err != nil {
+			switch err.Code.Name() {
+			case "foreign_key_violation":
+				switch {
+				case strings.HasSuffix(err.Constraint, "account_uuid_fkey"):
+					return ErrAccountNotFound
+				case strings.HasSuffix(err.Constraint, "user_uuid_fkey"):
+					return ErrUserNotRegistered
+				}
+			}
+		}
+		m.errorTracker.Report(ctx, err)
+		return err
+	}
+	return nil
 }
