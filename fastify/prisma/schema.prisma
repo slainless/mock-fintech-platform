@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator kysely {
+  provider = "prisma-kysely"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRESQL_URL")
+}
+
+model payment_accounts {
+  uuid                                                                       String                  @id(map: "payment_accounts_primary_key") @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_uuid                                                                  String                  @db.Uuid
+  service_id                                                                 String                  @db.VarChar(36)
+  name                                                                       String?                 @db.VarChar(255)
+  foreign_id                                                                 String                  @db.VarChar(255)
+  users                                                                      users                   @relation(fields: [user_uuid], references: [uuid], onDelete: NoAction, onUpdate: NoAction)
+  recurring_payments                                                         recurring_payments[]
+  shared_account_access                                                      shared_account_access[]
+  transaction_histories_transaction_histories_account_uuidTopayment_accounts transaction_histories[] @relation("transaction_histories_account_uuidTopayment_accounts")
+  transaction_histories_transaction_histories_dest_uuidTopayment_accounts    transaction_histories[] @relation("transaction_histories_dest_uuidTopayment_accounts")
+
+  @@unique([user_uuid, foreign_id, service_id], map: "unique_payment_accounts_user_uuid_foreign_id_service_id")
+  @@index([service_id], map: "idx_payment_accounts_service_id")
+  @@index([user_uuid], map: "idx_payment_accounts_user_uuid")
+}
+
+model recurring_payments {
+  uuid             String           @id(map: "recurring_payments_primary_key") @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  service_id       String           @unique @db.VarChar(36)
+  account_uuid     String           @db.Uuid
+  scheduler_type   Int              @db.SmallInt
+  last_charge      DateTime?        @db.Timestamp(6)
+  foreign_id       String           @db.VarChar(255)
+  charging_method  Int              @db.SmallInt
+  payment_accounts payment_accounts @relation(fields: [account_uuid], references: [uuid], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([account_uuid, foreign_id, service_id], map: "recurring_payments_account_uuid_foreign_id_service_id")
+  @@index([account_uuid], map: "idx_recurring_payments_account_uuid")
+  @@index([scheduler_type], map: "idx_recurring_payments_scheduler_type")
+  @@index([service_id], map: "idx_recurring_payments_service_id")
+}
+
+model schema_migrations {
+  version BigInt  @id
+  dirty   Boolean
+}
+
+model shared_account_access {
+  account_uuid     String           @db.Uuid
+  user_uuid        String           @db.Uuid
+  permission       Int
+  payment_accounts payment_accounts @relation(fields: [account_uuid], references: [uuid], onDelete: NoAction, onUpdate: NoAction)
+  users            users            @relation(fields: [user_uuid], references: [uuid], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([account_uuid, user_uuid])
+}
+
+model transaction_histories {
+  uuid                                                                  String            @id(map: "transaction_histories_primary_key") @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  account_uuid                                                          String            @db.Uuid
+  dest_uuid                                                             String?           @db.Uuid
+  mutation                                                              BigInt
+  currency                                                              String            @db.VarChar(24)
+  status                                                                Int               @db.SmallInt
+  address                                                               String?           @db.VarChar(255)
+  transaction_note                                                      String?           @db.VarChar(512)
+  transaction_date                                                      DateTime          @db.Timestamp(6)
+  transaction_type                                                      Int               @db.SmallInt
+  issuer_uuid                                                           String?           @db.Uuid
+  payment_accounts_transaction_histories_account_uuidTopayment_accounts payment_accounts  @relation("transaction_histories_account_uuidTopayment_accounts", fields: [account_uuid], references: [uuid], onDelete: NoAction, onUpdate: NoAction)
+  payment_accounts_transaction_histories_dest_uuidTopayment_accounts    payment_accounts? @relation("transaction_histories_dest_uuidTopayment_accounts", fields: [dest_uuid], references: [uuid], onDelete: NoAction, onUpdate: NoAction)
+  users                                                                 users?            @relation(fields: [issuer_uuid], references: [uuid], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([account_uuid], map: "idx_transaction_histories_account_uuid")
+  @@index([dest_uuid], map: "idx_transaction_histories_dest_uuid")
+  @@index([status], map: "idx_transaction_histories_status")
+  @@index([transaction_type], map: "idx_transaction_histories_transaction_type")
+}
+
+model users {
+  uuid                  String                  @id(map: "users_primary_key") @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  full_name             String?                 @db.VarChar(255)
+  user_name             String?                 @db.VarChar(255)
+  email                 String                  @unique @db.VarChar(255)
+  password_hash         String?                 @db.VarChar(60)
+  payment_accounts      payment_accounts[]
+  shared_account_access shared_account_access[]
+  transaction_histories transaction_histories[]
+}
