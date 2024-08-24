@@ -8,8 +8,8 @@ import (
 )
 
 type SendPayload struct {
-	AccountUUID  string `json:"account" form:"account_id" binding:"required,uuid"`
-	DestUUID     string `json:"dest" form:"dest_id" binding:"required,uuid"`
+	AccountUUID  string `json:"account_id" form:"account_id" binding:"required,uuid"`
+	DestUUID     string `json:"dest_id" form:"dest_id" binding:"required,uuid"`
 	Amount       int64  `json:"amount" form:"amount" binding:"required,max=999999999999999,min=1"`
 	CallbackData string `json:"callback" form:"callback"`
 }

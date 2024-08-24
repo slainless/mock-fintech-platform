@@ -6,18 +6,20 @@ consumes:
 definitions:
   payment.SendPayload:
     properties:
-      account:
+      account_id:
         type: string
       amount:
         maximum: 999999999999999
         minimum: 1
         type: integer
-      dest:
+      callback:
+        type: string
+      dest_id:
         type: string
     required:
-    - account
+    - account_id
     - amount
-    - dest
+    - dest_id
     type: object
   payment.SendResponse:
     properties:
