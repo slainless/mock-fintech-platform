@@ -246,6 +246,11 @@ paths:
   /account/{account_uuid}/permission:
     patch:
       parameters:
+      - description: Account UUID
+        in: path
+        name: account_uuid
+        required: true
+        type: string
       - description: Account data
         in: body
         name: payload

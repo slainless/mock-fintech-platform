@@ -137,6 +137,13 @@ const docTemplate = `{
                 "summary": "Add other user access permission to account",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Account UUID",
+                        "name": "account_uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "Account data",
                         "name": "payload",
                         "in": "body",
