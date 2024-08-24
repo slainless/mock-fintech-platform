@@ -127,7 +127,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/account/{account_uuid}/permission": {
             "patch": {
                 "produces": [
                     "application/json"

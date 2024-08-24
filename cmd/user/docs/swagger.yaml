@@ -243,6 +243,7 @@ paths:
           schema:
             type: string
       summary: Get user's payment account by UUID
+  /account/{account_uuid}/permission:
     patch:
       parameters:
       - description: Account data
