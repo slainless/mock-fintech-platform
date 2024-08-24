@@ -20,7 +20,7 @@ func (s *Service) histories() gin.HandlerFunc {
 		from, to, accountUUID := s.historyManager.GetHistoryParams(c)
 		var account *platform.PaymentAccount
 		if accountUUID != "" {
-			acc, err := s.accountManager.GetAccountWithAccess(c, user, uuid.MustParse(accountUUID), core.AccountPermissionHistory)
+			acc, err := s.accountManager.GetAccountWithAccess(c, user, uuid.MustParse(accountUUID), core.AccountPermissionBase)
 			if err != nil {
 				switch {
 				case errors.Is(err, core.ErrAccountNotFound):
