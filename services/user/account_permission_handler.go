@@ -57,7 +57,7 @@ func (s *Service) account_permission() gin.HandlerFunc {
 			return
 		}
 
-		err = s.accountManager.SetPermission(c, uuid.MustParse(payload.UserUUID), uuid.MustParse(payload.UserUUID), perm)
+		err = s.accountManager.SetPermission(c, userUUID, accountUUID, perm)
 		if err != nil {
 			switch {
 			case errors.Is(err, core.ErrAccountNotFound), errors.Is(err, core.ErrUserNotRegistered):
