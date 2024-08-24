@@ -4,4 +4,5 @@ bin/*
 .data/*
 !.data/README
 .data.*/*
+node_modules
 VERSION
