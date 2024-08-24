@@ -35,12 +35,6 @@ func (s *Service) account() gin.HandlerFunc {
 			return
 		}
 
-		if account.UserUUID != user.UUID {
-			c.String(404, core.ErrAccountNotFound.Error())
-			// c.String(403, "Forbidden")
-			return
-		}
-
 		balance, err := s.accountManager.GetBalance(c, &account.PaymentAccount)
 		if err != nil {
 			c.String(500, "Failed to get account")

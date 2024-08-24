@@ -205,7 +205,7 @@ func (m *PaymentAccountManager) SetPermission(ctx context.Context, userUUID, acc
 }
 
 func (m *PaymentAccountManager) GetAccountDetail(ctx context.Context, user *platform.User, accountUUID uuid.UUID) (*platform.PaymentAccountDetail, error) {
-	account, err := query.GetAccountDetail(ctx, m.db, user.UUID, accountUUID)
+	account, err := query.GetAccountDetail(ctx, m.db, user.UUID, accountUUID, AccountPermissionRead)
 	if err != nil {
 		if err == qrm.ErrNoRows {
 			return nil, ErrAccountNotFound
@@ -215,19 +215,23 @@ func (m *PaymentAccountManager) GetAccountDetail(ctx context.Context, user *plat
 	}
 
 	if account.UserUUID == user.UUID {
+		ownerAccess := platform.SharedAccountAccess{}
+		ownerAccess.AccountUUID = accountUUID
+		ownerAccess.UserUUID = user.UUID
+		ownerAccess.Permission = int32(AccountPermissionAll)
+
 		if account.Permissions == nil || len(account.Permissions) == 0 {
-			access := platform.SharedAccountAccess{}
-			access.AccountUUID = accountUUID
-			access.UserUUID = user.UUID
-			access.Permission = int32(AccountPermissionAll)
-			account.Permissions = []platform.SharedAccountAccess{access}
+			account.Permissions = []platform.SharedAccountAccess{ownerAccess}
 		} else {
-			for _, access := range account.Permissions {
-				if access.UserUUID == uuid.Nil {
-					access.UserUUID = user.UUID
-					access.AccountUUID = accountUUID
-					access.Permission = int32(AccountPermissionAll)
+			got := false
+			for i, access := range account.Permissions {
+				if access.UserUUID == uuid.Nil || access.UserUUID == account.UserUUID {
+					account.Permissions[i] = ownerAccess
+					got = true
 				}
+			}
+			if !got {
+				account.Permissions = append(account.Permissions, ownerAccess)
 			}
 		}
 		account.Permission = int32(AccountPermissionAll)

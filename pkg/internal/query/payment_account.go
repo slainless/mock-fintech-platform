@@ -26,12 +26,14 @@ const (
 func GetAllAccountsWithAccess(ctx context.Context, db *sql.DB, userUUID uuid.UUID, access AccountPermission) ([]platform.PaymentAccount, error) {
 	stmt := SELECT(
 		table.PaymentAccounts.AllColumns,
-		COALESCE(
-			table.SharedAccountAccess.Permission,
-			CASE(table.PaymentAccounts.UserUUID).
-				WHEN(UUID(userUUID)).THEN(Int32(int32(AccountPermissionAll))).
-				ELSE(Int32(int32(AccountPermissionBase))),
-		).AS("PaymentAccount.Permission"),
+		CASE(table.PaymentAccounts.UserUUID).
+			WHEN(UUID(userUUID)).THEN(Int32(int32(AccountPermissionAll))).
+			ELSE(
+				COALESCE(
+					table.SharedAccountAccess.Permission,
+					Int32(int32(AccountPermissionBase)),
+				),
+			).AS("PaymentAccount.Permission"),
 	).
 		FROM(
 			table.PaymentAccounts.
@@ -191,7 +193,7 @@ func SetPermission(ctx context.Context, db *sql.DB, userUUID, accountUUID uuid.U
 	return err
 }
 
-func GetAccountDetail(ctx context.Context, db *sql.DB, userUUID, accountUUID uuid.UUID) (*platform.PaymentAccountDetail, error) {
+func GetAccountDetail(ctx context.Context, db *sql.DB, userUUID, accountUUID uuid.UUID, access AccountPermission) (*platform.PaymentAccountDetail, error) {
 	stmt := SELECT(
 		table.PaymentAccounts.AllColumns,
 		table.SharedAccountAccess.AllColumns,
@@ -204,7 +206,8 @@ func GetAccountDetail(ctx context.Context, db *sql.DB, userUUID, accountUUID uui
 			table.PaymentAccounts.UUID.EQ(UUID(accountUUID)).
 				AND(OR(
 					table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)),
-					table.SharedAccountAccess.UserUUID.EQ(UUID(userUUID)),
+					table.SharedAccountAccess.UserUUID.EQ(UUID(userUUID)).
+						AND(table.SharedAccountAccess.Permission.BIT_AND(Int32(int32(access))).EQ(Int32(int32(access)))),
 				)),
 		)
 
