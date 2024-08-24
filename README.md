@@ -14,6 +14,7 @@
 - Gin as web framework
 - Swagger documentations
 - Auto-debit/Recurring payments (No services implemented yet, only interfaces)
+- Account sharing system (Allows payment account sharing to other users, for example: family, friend, etc.)
 
 ## Quickstart
 
@@ -107,7 +108,9 @@ will be handled by docker. However, it will halt the spawning of our microservic
 (after attempting to migrate new updates from upstream codebase). In this case, we have to resolve the 
 migration conflict ourselves before the service can be ran.
 
-### Service usage
+## Platform usage
+
+### Backend services
 
 > [!IMPORTANT]
 > Technical API specifications can be seen by accessing service's swagger endpoint:
@@ -135,7 +138,46 @@ https://github.com/slainless/mock-fintech-platform/blob/f8bfea24f62a653d1b640a60
 Also notice the usage of `util.MockSleep(3 * time.Second)`. Each of `MockPaymentService` endpoints will do artificial
 delay to simulate long processing of the black box (payment service).
 
-## Major Dependencies:
+### Overview
+
+This platform provides 2 main services to end-user:
+
+- Account manager service
+- Payment manager service
+
+Account manager service provides interfacing to manage user account in form of REST API:
+
+- User register
+- Payment account list
+- Payment account detail
+- Payment account permission (account sharing) setup
+- Transaction histories
+- User subscription list
+
+While payment manager service provides interfacing to do financial transaction to user payment account,
+also in form of REST API:
+
+- Send
+- Withdraw
+- Subscribe to subscription service
+- Unsubscribe from subscription service
+
+### Account sharing
+
+There is also latest added feature: Account sharing. This feature allows end-user to share their account
+to other users by giving them certain permissions to do certain activity on the platform. For example, this feature
+can be used to share payment account amongst family members but its not limited to only family members. Some of the 
+added access permissions to the accounts are:
+
+- Account detail and balance reading permission
+- Balance sending permission
+- Balance withdrawing permission
+- Subscription permission
+
+By default, payment account's owner has full control over the account, obviously, and only the owner can add permissions
+or revoke permissions to other accounts.
+
+## Major dependencies:
 
 - `urfave/cli/v2`: CLI engine & framework
 - `gin-gonic/gin`: Web framework
@@ -176,7 +218,7 @@ it still abstract (in my eyes) since we are dealing with black box (in this case
 
 But it doesn't reduce the difficulty of the project.
 
-There are 4 schemas made, which are tightly coupled their managers:
+There are 4 schemas made, which are tightly coupled with their managers:
 
 - Users
 - Payment Accounts
