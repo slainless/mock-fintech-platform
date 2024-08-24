@@ -91,7 +91,7 @@ func GetAccountWithAccess(ctx context.Context, db *sql.DB, userUUID, accountUUID
 						AND(table.SharedAccountAccess.Permission.BIT_AND(Int32(int32(access))).EQ(Int32(int32(access)))),
 				)),
 		).
-		GROUP_BY(table.PaymentAccounts.UUID, table.SharedAccountAccess.UserUUID)
+		GROUP_BY(table.PaymentAccounts.UUID, table.SharedAccountAccess.AccountUUID, table.SharedAccountAccess.UserUUID)
 
 	var account platform.PaymentAccount
 	err := stmt.QueryContext(ctx, db, &account)
