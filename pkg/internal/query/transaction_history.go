@@ -20,7 +20,7 @@ func historySelection() SelectStatement {
 		FROM(
 			table.TransactionHistories.
 				INNER_JOIN(table.PaymentAccounts, table.TransactionHistories.AccountUUID.EQ(table.PaymentAccounts.UUID)).
-				INNER_JOIN(table.SharedAccountAccess, table.TransactionHistories.AccountUUID.EQ(table.SharedAccountAccess.AccountUUID)),
+				LEFT_JOIN(table.SharedAccountAccess, table.TransactionHistories.AccountUUID.EQ(table.SharedAccountAccess.AccountUUID)),
 		)
 }
 
@@ -32,11 +32,11 @@ func GetHistoriesOfAccountWithAccess(ctx context.Context, db *sql.DB, userUUID, 
 				AND(table.TransactionHistories.TransactionDate.LT_EQ(TimestampT(to))).
 				AND(OR(
 					table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)),
+					table.TransactionHistories.IssuerUUID.EQ(UUID(userUUID)),
 					table.SharedAccountAccess.UserUUID.EQ(UUID(userUUID)).
 						AND(table.SharedAccountAccess.Permission.BIT_AND(Int32(int32(access))).EQ(Int32(int32(access)))),
 				)),
-		).
-		GROUP_BY(table.TransactionHistories.UUID)
+		)
 
 	histories := make([]platform.TransactionHistory, 0)
 	err := stmt.QueryContext(ctx, db, &histories)
@@ -52,12 +52,12 @@ func GetHistoriesWithAccess(ctx context.Context, db *sql.DB, userUUID uuid.UUID,
 		WHERE(
 			OR(
 				table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)),
+				table.TransactionHistories.IssuerUUID.EQ(UUID(userUUID)),
 				table.SharedAccountAccess.UserUUID.EQ(UUID(userUUID)).
 					AND(table.SharedAccountAccess.Permission.BIT_AND(Int32(int32(access))).EQ(Int32(int32(access)))),
 			).AND(table.TransactionHistories.TransactionDate.GT_EQ(TimestampT(from))).
 				AND(table.TransactionHistories.TransactionDate.LT_EQ(TimestampT(to))),
-		).
-		GROUP_BY(table.TransactionHistories.UUID)
+		)
 
 	histories := make([]platform.TransactionHistory, 0)
 	err := stmt.QueryContext(ctx, db, &histories)
