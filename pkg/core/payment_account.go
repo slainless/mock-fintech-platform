@@ -145,6 +145,8 @@ func (m *PaymentAccountManager) Register(ctx context.Context, user *platform.Use
 		return nil, err
 	}
 
+	account.Permission = int32(AccountPermissionAll)
+
 	access := platform.SharedAccountAccess{}
 	access.AccountUUID = account.UUID
 	access.UserUUID = user.UUID
