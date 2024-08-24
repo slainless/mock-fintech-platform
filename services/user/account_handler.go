@@ -10,8 +10,8 @@ import (
 )
 
 type AccountResponse struct {
-	Account *platform.PaymentAccount `json:"account"`
-	Balance *platform.MonetaryAmount `json:"balance"`
+	Account *platform.PaymentAccountDetail `json:"account"`
+	Balance *platform.MonetaryAmount       `json:"balance"`
 }
 
 func (s *Service) account() gin.HandlerFunc {
@@ -24,7 +24,7 @@ func (s *Service) account() gin.HandlerFunc {
 			return
 		}
 
-		account, err := s.accountManager.GetAccountWhereUser(c, user, accountUUID)
+		account, err := s.accountManager.GetAccountDetail(c, user, accountUUID)
 		if err != nil {
 			switch {
 			case errors.Is(err, core.ErrAccountNotFound):
@@ -35,13 +35,7 @@ func (s *Service) account() gin.HandlerFunc {
 			return
 		}
 
-		if account.UserUUID != user.UUID {
-			c.String(404, core.ErrAccountNotFound.Error())
-			// c.String(403, "Forbidden")
-			return
-		}
-
-		balance, err := s.accountManager.GetBalance(c, account)
+		balance, err := s.accountManager.GetBalance(c, &account.PaymentAccount)
 		if err != nil {
 			c.String(500, "Failed to get account")
 			s.errorTracker.Report(c, err)

@@ -30,7 +30,7 @@ func NewPaymentManager(account *PaymentAccountManager, history *TransactionHisto
 	}
 }
 
-func (m *PaymentManager) Send(ctx context.Context, from, to *platform.PaymentAccount, amount int64) (*platform.TransactionHistory, error) {
+func (m *PaymentManager) Send(ctx context.Context, user *platform.User, from, to *platform.PaymentAccount, amount int64, callbackData string) (*platform.TransactionHistory, error) {
 	if amount <= 0 {
 		return nil, ErrInvalidAmount
 	}
@@ -40,7 +40,7 @@ func (m *PaymentManager) Send(ctx context.Context, from, to *platform.PaymentAcc
 		return nil, ErrPaymentServiceNotSupported
 	}
 
-	sourceHistory, err := service.Send(ctx, from, to, amount)
+	sourceHistory, err := service.Send(ctx, user, from, to, amount, callbackData)
 	if err != nil {
 		m.errorTracker.Report(ctx, err)
 		return nil, err
@@ -61,13 +61,13 @@ func (m *PaymentManager) Send(ctx context.Context, from, to *platform.PaymentAcc
 	return sourceHistory, nil
 }
 
-func (m *PaymentManager) Withdraw(ctx context.Context, from *platform.PaymentAccount, amount int64, callbackData string) (*platform.TransactionHistory, error) {
+func (m *PaymentManager) Withdraw(ctx context.Context, user *platform.User, from *platform.PaymentAccount, amount int64, callbackData string) (*platform.TransactionHistory, error) {
 	service := m.services[from.ServiceID]
 	if service == nil {
 		return nil, ErrPaymentServiceNotSupported
 	}
 
-	history, err := service.Withdraw(ctx, from, amount, callbackData)
+	history, err := service.Withdraw(ctx, user, from, amount, callbackData)
 	if err != nil {
 		m.errorTracker.Report(ctx, err)
 		return nil, err

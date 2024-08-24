@@ -13,3 +13,11 @@ func PQErrorCode(err error) string {
 	}
 	return ""
 }
+
+func PQError(err error) *pq.Error {
+	var pqErr *pq.Error
+	if errors.As(err, &pqErr) {
+		return pqErr
+	}
+	return nil
+}

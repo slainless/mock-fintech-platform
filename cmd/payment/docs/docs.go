@@ -187,12 +187,12 @@ const docTemplate = `{
         "payment.SendPayload": {
             "type": "object",
             "required": [
-                "account",
+                "account_id",
                 "amount",
-                "dest"
+                "dest_id"
             ],
             "properties": {
-                "account": {
+                "account_id": {
                     "type": "string"
                 },
                 "amount": {
@@ -200,7 +200,10 @@ const docTemplate = `{
                     "maximum": 999999999999999,
                     "minimum": 1
                 },
-                "dest": {
+                "callback": {
+                    "type": "string"
+                },
+                "dest_id": {
                     "type": "string"
                 }
             }
@@ -310,9 +313,6 @@ const docTemplate = `{
                 "foreignID": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "lastCharge": {
                     "type": "string"
                 },
@@ -342,13 +342,13 @@ const docTemplate = `{
                 "destUUID": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
+                "issuerUUID": {
+                    "type": "string"
                 },
                 "mutation": {
                     "type": "integer"
                 },
-                "serviceUUID": {
+                "serviceID": {
                     "type": "string"
                 },
                 "status": {

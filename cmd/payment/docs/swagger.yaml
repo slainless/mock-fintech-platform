@@ -6,18 +6,20 @@ consumes:
 definitions:
   payment.SendPayload:
     properties:
-      account:
+      account_id:
         type: string
       amount:
         maximum: 999999999999999
         minimum: 1
         type: integer
-      dest:
+      callback:
+        type: string
+      dest_id:
         type: string
     required:
-    - account
+    - account_id
     - amount
-    - dest
+    - dest_id
     type: object
   payment.SendResponse:
     properties:
@@ -89,8 +91,6 @@ definitions:
         type: integer
       foreignID:
         type: string
-      id:
-        type: integer
       lastCharge:
         type: string
       schedulerType:
@@ -110,11 +110,11 @@ definitions:
         type: string
       destUUID:
         type: string
-      id:
-        type: integer
+      issuerUUID:
+        type: string
       mutation:
         type: integer
-      serviceUUID:
+      serviceID:
         type: string
       status:
         type: integer

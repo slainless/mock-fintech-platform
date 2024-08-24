@@ -129,6 +129,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/account/{account_uuid}/permission": {
+            "patch": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Add other user access permission to account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Account UUID",
+                        "name": "account_uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Account data",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.AccountPermissionPayload"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authentication token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/history": {
             "get": {
                 "produces": [
@@ -267,11 +314,40 @@ const docTemplate = `{
                 "foreignID": {
                     "type": "string"
                 },
-                "id": {
+                "name": {
+                    "type": "string"
+                },
+                "permission": {
                     "type": "integer"
+                },
+                "serviceID": {
+                    "type": "string"
+                },
+                "userUUID": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "platform.PaymentAccountDetail": {
+            "type": "object",
+            "properties": {
+                "foreignID": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "permission": {
+                    "type": "integer"
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/platform.SharedAccountAccess"
+                    }
                 },
                 "serviceID": {
                     "type": "string"
@@ -296,9 +372,6 @@ const docTemplate = `{
                 "foreignID": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "lastCharge": {
                     "type": "string"
                 },
@@ -309,6 +382,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "platform.SharedAccountAccess": {
+            "type": "object",
+            "properties": {
+                "accountUUID": {
+                    "type": "string"
+                },
+                "permission": {
+                    "type": "integer"
+                },
+                "userUUID": {
                     "type": "string"
                 }
             }
@@ -328,13 +415,13 @@ const docTemplate = `{
                 "destUUID": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
+                "issuerUUID": {
+                    "type": "string"
                 },
                 "mutation": {
                     "type": "integer"
                 },
-                "serviceUUID": {
+                "serviceID": {
                     "type": "string"
                 },
                 "status": {
@@ -357,11 +444,29 @@ const docTemplate = `{
                 }
             }
         },
+        "user.AccountPermissionPayload": {
+            "type": "object",
+            "required": [
+                "permission",
+                "user_id"
+            ],
+            "properties": {
+                "permission": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "user.AccountResponse": {
             "type": "object",
             "properties": {
                 "account": {
-                    "$ref": "#/definitions/platform.PaymentAccount"
+                    "$ref": "#/definitions/platform.PaymentAccountDetail"
                 },
                 "balance": {
                     "$ref": "#/definitions/platform.MonetaryAmount"

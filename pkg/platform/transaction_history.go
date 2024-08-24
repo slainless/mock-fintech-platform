@@ -7,6 +7,6 @@ import (
 
 type TransactionHistory struct {
 	model.TransactionHistories
-	ServiceUUID string
-	UserUUID    uuid.UUID
+	ServiceID string
+	UserUUID  uuid.UUID
 }

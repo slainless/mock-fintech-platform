@@ -30,7 +30,7 @@ func (s *Service) withdraw() gin.HandlerFunc {
 			return
 		}
 
-		account, err := s.accountManager.GetAccountWhereUser(c, user, uuid.MustParse(withdraw.AccountUUID))
+		account, err := s.accountManager.GetAccountWithAccess(c, user, uuid.MustParse(withdraw.AccountUUID), core.AccountPermissionWithdraw)
 		if err != nil {
 			switch {
 			case errors.Is(err, core.ErrAccountNotFound):
@@ -41,12 +41,7 @@ func (s *Service) withdraw() gin.HandlerFunc {
 			return
 		}
 
-		if account.UserUUID != user.UUID {
-			c.String(400, core.ErrAccountNotFound.Error())
-			return
-		}
-
-		history, err := s.paymentManager.Withdraw(c, account, withdraw.Amount, withdraw.CallbackData)
+		history, err := s.paymentManager.Withdraw(c, user, account, withdraw.Amount, withdraw.CallbackData)
 		if err != nil {
 			switch {
 			case errors.Is(err, core.ErrPaymentServiceNotSupported):

@@ -3,6 +3,7 @@ package payment_service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math/rand"
 	"time"
 
@@ -26,10 +27,15 @@ func (s *MockPaymentService) Balance(ctx context.Context, account *platform.Paym
 // GetMatchingHistory implements platform.PaymentService.
 func (*MockPaymentService) GetMatchingHistory(ctx context.Context, account *platform.PaymentAccount, history *platform.TransactionHistory) (*platform.TransactionHistory, error) {
 	util.MockSleep(2 * time.Second)
-	if util.LeaveItToRNG() {
+	// let us always receive the matching history...
+	if util.LeaveItToRNG() && false {
 		return nil, errors.New("Oops! Failed to get matching history")
 	} else {
-		note := "Received from " + account.UserUUID.String()
+		note := fmt.Sprintf(
+			"Received amount [%d] from account [%s, service: %s], sender [%s].",
+			history.Mutation*-1, history.AccountUUID, history.ServiceID, history.IssuerUUID,
+		)
+
 		match := *history
 		match.TransactionNote = &note
 		match.AccountUUID = *history.DestUUID
@@ -41,11 +47,23 @@ func (*MockPaymentService) GetMatchingHistory(ctx context.Context, account *plat
 }
 
 // Send implements platform.PaymentService.
-func (*MockPaymentService) Send(ctx context.Context, source *platform.PaymentAccount, des *platform.PaymentAccount, amount int64) (*platform.TransactionHistory, error) {
+func (*MockPaymentService) Send(ctx context.Context, user *platform.User, source *platform.PaymentAccount, des *platform.PaymentAccount, amount int64, callbackData string) (*platform.TransactionHistory, error) {
 	util.MockSleep(3 * time.Second)
 	if util.LeaveItToRNG() {
 		return nil, errors.New("Failed to send money")
 	} else {
+		var extraNote string
+		if user.UUID != source.UserUUID {
+			extraNote = fmt.Sprintf("This is issued by shared user")
+		} else {
+			extraNote = fmt.Sprintf("This is issued by owner")
+		}
+
+		note := fmt.Sprintf(
+			"User [%s] sending from account [%s, service: %s] with amount [%d] to account [%s, service: %s]. (note: %s)",
+			user.UUID, source.UUID, source.ServiceID, amount, des.UUID, des.ServiceID, extraNote,
+		)
+
 		return &platform.TransactionHistory{
 			TransactionHistories: model.TransactionHistories{
 				UUID:            uuid.New(),
@@ -54,9 +72,12 @@ func (*MockPaymentService) Send(ctx context.Context, source *platform.PaymentAcc
 				Mutation:        amount * -1,
 				Currency:        "USD",
 				TransactionDate: time.Now(),
+				TransactionNote: &note,
+				TransactionType: int16(platform.TransactionTypeSend),
+				IssuerUUID:      &user.UUID,
 			},
-			ServiceUUID: source.ServiceID,
-			UserUUID:    source.UserUUID,
+			ServiceID: source.ServiceID,
+			UserUUID:  source.UserUUID,
 		}, nil
 	}
 }
@@ -72,11 +93,22 @@ func (*MockPaymentService) Validate(ctx context.Context, user *platform.User, ac
 }
 
 // Withdraw implements platform.PaymentService.
-func (*MockPaymentService) Withdraw(ctx context.Context, account *platform.PaymentAccount, amount int64, callbackData string) (*platform.TransactionHistory, error) {
+func (*MockPaymentService) Withdraw(ctx context.Context, user *platform.User, account *platform.PaymentAccount, amount int64, callbackData string) (*platform.TransactionHistory, error) {
 	util.MockSleep(2 * time.Second)
 	if util.LeaveItToRNG() {
 		return nil, errors.New("Failed to withdraw money")
 	} else {
+		var extraNote string
+		if user.UUID != account.UserUUID {
+			extraNote = fmt.Sprintf("This is issued by shared user")
+		} else {
+			extraNote = fmt.Sprintf("This is issued by owner")
+		}
+
+		note := fmt.Sprintf(
+			"User [%s] withdrawing from account [%s, service: %s] with amount [%d]. Callback data: %s. (note: %s)",
+			user.UUID, account.UUID, account.ServiceID, amount, callbackData, extraNote,
+		)
 		return &platform.TransactionHistory{
 			TransactionHistories: model.TransactionHistories{
 				UUID:            uuid.New(),
@@ -84,9 +116,12 @@ func (*MockPaymentService) Withdraw(ctx context.Context, account *platform.Payme
 				Mutation:        amount * -1,
 				Currency:        "USD",
 				TransactionDate: time.Now(),
+				TransactionType: int16(platform.TransactionTypeWithdraw),
+				IssuerUUID:      &user.UUID,
+				TransactionNote: &note,
 			},
-			ServiceUUID: account.ServiceID,
-			UserUUID:    account.UserUUID,
+			ServiceID: account.ServiceID,
+			UserUUID:  account.UserUUID,
 		}, nil
 	}
 }

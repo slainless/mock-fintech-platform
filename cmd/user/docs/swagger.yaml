@@ -15,10 +15,29 @@ definitions:
     properties:
       foreignID:
         type: string
-      id:
-        type: integer
       name:
         type: string
+      permission:
+        type: integer
+      serviceID:
+        type: string
+      userUUID:
+        type: string
+      uuid:
+        type: string
+    type: object
+  platform.PaymentAccountDetail:
+    properties:
+      foreignID:
+        type: string
+      name:
+        type: string
+      permission:
+        type: integer
+      permissions:
+        items:
+          $ref: '#/definitions/platform.SharedAccountAccess'
+        type: array
       serviceID:
         type: string
       userUUID:
@@ -34,8 +53,6 @@ definitions:
         type: integer
       foreignID:
         type: string
-      id:
-        type: integer
       lastCharge:
         type: string
       schedulerType:
@@ -43,6 +60,15 @@ definitions:
       serviceID:
         type: string
       uuid:
+        type: string
+    type: object
+  platform.SharedAccountAccess:
+    properties:
+      accountUUID:
+        type: string
+      permission:
+        type: integer
+      userUUID:
         type: string
     type: object
   platform.TransactionHistory:
@@ -55,11 +81,11 @@ definitions:
         type: string
       destUUID:
         type: string
-      id:
-        type: integer
+      issuerUUID:
+        type: string
       mutation:
         type: integer
-      serviceUUID:
+      serviceID:
         type: string
       status:
         type: integer
@@ -74,10 +100,22 @@ definitions:
       uuid:
         type: string
     type: object
+  user.AccountPermissionPayload:
+    properties:
+      permission:
+        items:
+          type: string
+        type: array
+      user_id:
+        type: string
+    required:
+    - permission
+    - user_id
+    type: object
   user.AccountResponse:
     properties:
       account:
-        $ref: '#/definitions/platform.PaymentAccount'
+        $ref: '#/definitions/platform.PaymentAccountDetail'
       balance:
         $ref: '#/definitions/platform.MonetaryAmount'
     type: object
@@ -205,6 +243,37 @@ paths:
           schema:
             type: string
       summary: Get user's payment account by UUID
+  /account/{account_uuid}/permission:
+    patch:
+      parameters:
+      - description: Account UUID
+        in: path
+        name: account_uuid
+        required: true
+        type: string
+      - description: Account data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/user.AccountPermissionPayload'
+      - description: Authentication token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        default:
+          description: ""
+          schema:
+            type: string
+      summary: Add other user access permission to account
   /history:
     get:
       parameters:

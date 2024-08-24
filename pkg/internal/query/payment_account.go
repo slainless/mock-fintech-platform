@@ -6,14 +6,47 @@ import (
 
 	. "github.com/go-jet/jet/v2/postgres"
 	"github.com/google/uuid"
+	"github.com/slainless/mock-fintech-platform/pkg/internal/artifact/database/mock_fintech/public/model"
 	"github.com/slainless/mock-fintech-platform/pkg/internal/artifact/database/mock_fintech/public/table"
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
 
-func GetAllAccounts(ctx context.Context, db *sql.DB, userUUID uuid.UUID) ([]platform.PaymentAccount, error) {
-	stmt := SELECT(table.PaymentAccounts.AllColumns).
-		FROM(table.PaymentAccounts).
-		WHERE(table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)))
+type AccountPermission int32
+
+const (
+	AccountPermissionBase         AccountPermission = 0b00000
+	AccountPermissionRead         AccountPermission = 0b00001
+	AccountPermissionHistory      AccountPermission = 0b00010
+	AccountPermissionWithdraw     AccountPermission = 0b00100
+	AccountPermissionSend         AccountPermission = 0b01000
+	AccountPermissionSubscription AccountPermission = 0b10000
+	AccountPermissionAll          AccountPermission = 0b11111
+)
+
+func GetAllAccountsWithAccess(ctx context.Context, db *sql.DB, userUUID uuid.UUID, access AccountPermission) ([]platform.PaymentAccount, error) {
+	stmt := SELECT(
+		table.PaymentAccounts.AllColumns,
+		CASE(table.PaymentAccounts.UserUUID).
+			WHEN(UUID(userUUID)).THEN(Int32(int32(AccountPermissionAll))).
+			ELSE(
+				COALESCE(
+					table.SharedAccountAccess.Permission,
+					Int32(int32(AccountPermissionBase)),
+				),
+			).AS("PaymentAccount.Permission"),
+	).
+		FROM(
+			table.PaymentAccounts.
+				LEFT_JOIN(table.SharedAccountAccess, table.PaymentAccounts.UUID.EQ(table.SharedAccountAccess.AccountUUID)),
+		).
+		WHERE(
+			table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)).
+				OR(
+					table.SharedAccountAccess.UserUUID.EQ(UUID(userUUID)).
+						AND(table.SharedAccountAccess.Permission.BIT_AND(Int32(int32(access))).EQ(Int32(int32(access)))),
+				),
+		).
+		GROUP_BY(table.PaymentAccounts.UUID, table.SharedAccountAccess.AccountUUID, table.SharedAccountAccess.UserUUID)
 
 	accounts := make([]platform.PaymentAccount, 0)
 	err := stmt.QueryContext(ctx, db, &accounts)
@@ -38,13 +71,29 @@ func GetAccount(ctx context.Context, db *sql.DB, accountUUID uuid.UUID) (*platfo
 	return &account, nil
 }
 
-func GetAccountWhereUser(ctx context.Context, db *sql.DB, userUUID, accountUUID uuid.UUID) (*platform.PaymentAccount, error) {
-	stmt := SELECT(table.PaymentAccounts.AllColumns).
-		FROM(table.PaymentAccounts).
+func GetAccountWithAccess(ctx context.Context, db *sql.DB, userUUID, accountUUID uuid.UUID, access AccountPermission) (*platform.PaymentAccount, error) {
+	stmt := SELECT(
+		table.PaymentAccounts.AllColumns,
+		COALESCE(
+			table.SharedAccountAccess.Permission,
+			CASE(table.PaymentAccounts.UserUUID).
+				WHEN(UUID(userUUID)).THEN(Int32(int32(AccountPermissionAll))).
+				ELSE(Int32(int32(AccountPermissionBase))),
+		).AS("PaymentAccount.Permission"),
+	).
+		FROM(
+			table.PaymentAccounts.
+				LEFT_JOIN(table.SharedAccountAccess, table.PaymentAccounts.UUID.EQ(table.SharedAccountAccess.AccountUUID)),
+		).
 		WHERE(
-			table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)).
-				AND(table.PaymentAccounts.UUID.EQ(UUID(accountUUID))),
-		)
+			table.PaymentAccounts.UUID.EQ(UUID(accountUUID)).
+				AND(OR(
+					table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)),
+					table.SharedAccountAccess.UserUUID.EQ(UUID(userUUID)).
+						AND(table.SharedAccountAccess.Permission.BIT_AND(Int32(int32(access))).EQ(Int32(int32(access)))),
+				)),
+		).
+		GROUP_BY(table.PaymentAccounts.UUID, table.SharedAccountAccess.AccountUUID, table.SharedAccountAccess.UserUUID)
 
 	var account platform.PaymentAccount
 	err := stmt.QueryContext(ctx, db, &account)
@@ -118,4 +167,55 @@ func InsertAccount(ctx context.Context, db *sql.DB, account *platform.PaymentAcc
 	}
 
 	return nil
+}
+
+func SetPermission(ctx context.Context, db *sql.DB, userUUID, accountUUID uuid.UUID, permission AccountPermission) error {
+	stmt := table.SharedAccountAccess.INSERT(
+		table.SharedAccountAccess.AllColumns,
+	).
+		MODEL(&model.SharedAccountAccess{
+			AccountUUID: accountUUID,
+			UserUUID:    userUUID,
+			Permission:  int32(permission),
+		}).
+		ON_CONFLICT(table.SharedAccountAccess.AccountUUID, table.SharedAccountAccess.UserUUID).
+		DO_UPDATE(
+			SET(
+				table.SharedAccountAccess.Permission.SET(table.SharedAccountAccess.EXCLUDED.Permission),
+			).
+				WHERE(
+					table.SharedAccountAccess.AccountUUID.EQ(table.SharedAccountAccess.EXCLUDED.AccountUUID).
+						AND(table.SharedAccountAccess.UserUUID.EQ(table.SharedAccountAccess.EXCLUDED.UserUUID)),
+				),
+		)
+
+	_, err := stmt.ExecContext(ctx, db)
+	return err
+}
+
+func GetAccountDetail(ctx context.Context, db *sql.DB, userUUID, accountUUID uuid.UUID, access AccountPermission) (*platform.PaymentAccountDetail, error) {
+	stmt := SELECT(
+		table.PaymentAccounts.AllColumns,
+		table.SharedAccountAccess.AllColumns,
+	).
+		FROM(
+			table.PaymentAccounts.
+				LEFT_JOIN(table.SharedAccountAccess, table.PaymentAccounts.UUID.EQ(table.SharedAccountAccess.AccountUUID)),
+		).
+		WHERE(
+			table.PaymentAccounts.UUID.EQ(UUID(accountUUID)).
+				AND(OR(
+					table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)),
+					table.SharedAccountAccess.UserUUID.EQ(UUID(userUUID)).
+						AND(table.SharedAccountAccess.Permission.BIT_AND(Int32(int32(access))).EQ(Int32(int32(access)))),
+				)),
+		)
+
+	var account platform.PaymentAccountDetail
+	err := stmt.QueryContext(ctx, db, &account)
+	if err != nil {
+		return nil, err
+	}
+
+	return &account, nil
 }

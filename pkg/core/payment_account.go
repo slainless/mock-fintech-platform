@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
 
 	"github.com/go-jet/jet/v2/qrm"
 	"github.com/google/uuid"
@@ -13,9 +14,24 @@ import (
 	"github.com/slainless/mock-fintech-platform/pkg/platform"
 )
 
-var ErrInvalidTransferDestination = errors.New("invalid transfer destination")
-var ErrAccountNotFound = errors.New("account not found")
-var ErrAccountAlreadyRegistered = errors.New("account already registered")
+var (
+	ErrInvalidTransferDestination = errors.New("invalid transfer destination")
+	ErrAccountNotFound            = errors.New("account not found or no permission")
+	ErrAccountAlreadyRegistered   = errors.New("account already registered")
+	ErrInvalidPermission          = errors.New("invalid permission")
+)
+
+type AccountPermission = query.AccountPermission
+
+const (
+	AccountPermissionBase         = query.AccountPermissionBase
+	AccountPermissionRead         = query.AccountPermissionRead
+	AccountPermissionHistory      = query.AccountPermissionHistory
+	AccountPermissionSend         = query.AccountPermissionSend
+	AccountPermissionWithdraw     = query.AccountPermissionWithdraw
+	AccountPermissionSubscription = query.AccountPermissionSubscription
+	AccountPermissionAll          = query.AccountPermissionAll
+)
 
 type PaymentAccountManager struct {
 	services     map[string]platform.PaymentService
@@ -33,8 +49,8 @@ func NewPaymentAccountManager(db *sql.DB, svc map[string]platform.PaymentService
 	}
 }
 
-func (m *PaymentAccountManager) GetAccounts(ctx context.Context, user *platform.User) ([]platform.PaymentAccount, error) {
-	accounts, err := query.GetAllAccounts(ctx, m.db, user.UUID)
+func (m *PaymentAccountManager) GetAccountsWithAccess(ctx context.Context, user *platform.User, access AccountPermission) ([]platform.PaymentAccount, error) {
+	accounts, err := query.GetAllAccountsWithAccess(ctx, m.db, user.UUID, access)
 	if err != nil {
 		m.errorTracker.Report(ctx, err)
 		return nil, err
@@ -56,8 +72,8 @@ func (m *PaymentAccountManager) GetAccount(ctx context.Context, accountUUID uuid
 	return account, nil
 }
 
-func (m *PaymentAccountManager) GetAccountWhereUser(ctx context.Context, user *platform.User, accountUUID uuid.UUID) (*platform.PaymentAccount, error) {
-	account, err := query.GetAccountWhereUser(ctx, m.db, user.UUID, accountUUID)
+func (m *PaymentAccountManager) GetAccountWithAccess(ctx context.Context, user *platform.User, accountUUID uuid.UUID, access AccountPermission) (*platform.PaymentAccount, error) {
+	account, err := query.GetAccountWithAccess(ctx, m.db, user.UUID, accountUUID, access)
 	if err != nil {
 		if err == qrm.ErrNoRows {
 			return nil, ErrAccountNotFound
@@ -67,24 +83,6 @@ func (m *PaymentAccountManager) GetAccountWhereUser(ctx context.Context, user *p
 	}
 
 	return account, nil
-}
-
-func (m *PaymentAccountManager) PrepareTransfer(ctx context.Context, fromUUID, toUUID uuid.UUID) (*platform.PaymentAccount, *platform.PaymentAccount, error) {
-	from, to, err := query.GetTwoAccounts(ctx, m.db, fromUUID, toUUID)
-	if err != nil {
-		m.errorTracker.Report(ctx, err)
-		return nil, nil, err
-	}
-
-	if from == nil {
-		return nil, nil, ErrAccountNotFound
-	}
-
-	if to == nil {
-		return nil, nil, ErrInvalidTransferDestination
-	}
-
-	return from, to, nil
 }
 
 func (m *PaymentAccountManager) CheckOwner(ctx context.Context, user *platform.User, accountUUID uuid.UUID) error {
@@ -115,7 +113,7 @@ func (m *PaymentAccountManager) GetBalance(ctx context.Context, account *platfor
 	return balance, nil
 }
 
-func (m *PaymentAccountManager) Register(ctx context.Context, user *platform.User, serviceID string, name string, accountForeignID string, CallbackData string) (*platform.PaymentAccount, error) {
+func (m *PaymentAccountManager) Register(ctx context.Context, user *platform.User, serviceID string, name string, accountForeignID string, CallbackData string) (*platform.PaymentAccountDetail, error) {
 	service := m.services[serviceID]
 	if service == nil {
 		return nil, ErrPaymentServiceNotSupported
@@ -145,6 +143,105 @@ func (m *PaymentAccountManager) Register(ctx context.Context, user *platform.Use
 		}
 		m.errorTracker.Report(ctx, err)
 		return nil, err
+	}
+
+	account.Permission = int32(AccountPermissionAll)
+
+	access := platform.SharedAccountAccess{}
+	access.AccountUUID = account.UUID
+	access.UserUUID = user.UUID
+	access.Permission = int32(AccountPermissionAll)
+
+	acc := &platform.PaymentAccountDetail{
+		PaymentAccount: *account,
+		Permissions:    []platform.SharedAccountAccess{access},
+	}
+
+	return acc, nil
+}
+
+func (m *PaymentAccountManager) ParsePermission(permission []string) (AccountPermission, error) {
+	perm := AccountPermissionBase
+	for _, p := range permission {
+		switch p {
+		case "read":
+			perm |= AccountPermissionRead
+		case "history":
+			perm |= AccountPermissionHistory
+		case "send":
+			perm |= AccountPermissionSend
+		case "withdraw":
+			perm |= AccountPermissionWithdraw
+		case "subscription":
+			perm |= AccountPermissionSubscription
+		case "all":
+			perm |= AccountPermissionAll
+		default:
+			return 0, ErrInvalidPermission
+		}
+	}
+
+	return perm, nil
+}
+
+func (m *PaymentAccountManager) SetPermission(ctx context.Context, userUUID, accountUUID uuid.UUID, permission AccountPermission) error {
+	err := query.SetPermission(ctx, m.db, userUUID, accountUUID, permission)
+	if err != nil {
+		if err := util.PQError(err); err != nil {
+			switch err.Code.Name() {
+			case "foreign_key_violation":
+				switch {
+				case strings.HasSuffix(err.Constraint, "account_uuid_fkey"):
+					return ErrAccountNotFound
+				case strings.HasSuffix(err.Constraint, "user_uuid_fkey"):
+					return ErrUserNotRegistered
+				}
+			}
+		}
+		m.errorTracker.Report(ctx, err)
+		return err
+	}
+	return nil
+}
+
+func (m *PaymentAccountManager) GetAccountDetail(ctx context.Context, user *platform.User, accountUUID uuid.UUID) (*platform.PaymentAccountDetail, error) {
+	account, err := query.GetAccountDetail(ctx, m.db, user.UUID, accountUUID, AccountPermissionRead)
+	if err != nil {
+		if err == qrm.ErrNoRows {
+			return nil, ErrAccountNotFound
+		}
+		m.errorTracker.Report(ctx, err)
+		return nil, err
+	}
+
+	if account.UserUUID == user.UUID {
+		ownerAccess := platform.SharedAccountAccess{}
+		ownerAccess.AccountUUID = accountUUID
+		ownerAccess.UserUUID = user.UUID
+		ownerAccess.Permission = int32(AccountPermissionAll)
+
+		if account.Permissions == nil || len(account.Permissions) == 0 {
+			account.Permissions = []platform.SharedAccountAccess{ownerAccess}
+		} else {
+			got := false
+			for i, access := range account.Permissions {
+				if access.UserUUID == uuid.Nil || access.UserUUID == account.UserUUID {
+					account.Permissions[i] = ownerAccess
+					got = true
+				}
+			}
+			if !got {
+				account.Permissions = append(account.Permissions, ownerAccess)
+			}
+		}
+		account.Permission = int32(AccountPermissionAll)
+	} else {
+		for _, access := range account.Permissions {
+			if access.UserUUID == user.UUID {
+				account.Permission = access.Permission
+				break
+			}
+		}
 	}
 
 	return account, nil

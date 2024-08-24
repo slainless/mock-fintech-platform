@@ -10,12 +10,19 @@ var (
 	ErrTransactionRejected = errors.New("transaction rejected")
 )
 
+type TransactionType int16
+
+const (
+	TransactionTypeWithdraw TransactionType = iota
+	TransactionTypeSend
+)
+
 type PaymentService interface {
 	// Send sends money from one account to another.
-	Send(ctx context.Context, source, des *PaymentAccount, amount int64) (*TransactionHistory, error)
+	Send(ctx context.Context, user *User, source, des *PaymentAccount, amount int64, callbackData string) (*TransactionHistory, error)
 
 	// Withdraw money.
-	Withdraw(ctx context.Context, account *PaymentAccount, amount int64, callbackData string) (*TransactionHistory, error)
+	Withdraw(ctx context.Context, user *User, account *PaymentAccount, amount int64, callbackData string) (*TransactionHistory, error)
 
 	// Get matching history from destination service/account
 	GetMatchingHistory(ctx context.Context, account *PaymentAccount, history *TransactionHistory) (*TransactionHistory, error)

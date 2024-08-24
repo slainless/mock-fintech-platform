@@ -76,3 +76,14 @@ func stubHistories(c *gin.Context) {}
 // @failure default {string} string
 // @success 200 {object} SubscriptionResponse
 func stubSubscriptions(c *gin.Context) {}
+
+// ===
+// @summary Add other user access permission to account
+// @router /account/{account_uuid}/permission [patch]
+// @param account_uuid path string true "Account UUID"
+// @param payload body AccountPermissionPayload true "Account data"
+// @param Authorization header string true "Authentication token"
+// @produce json
+// @failure default {string} string
+// @success 200 {string} string
+func stubSetPermission(c *gin.Context) {}

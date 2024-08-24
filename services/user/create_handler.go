@@ -43,7 +43,7 @@ func (s *Service) create() gin.HandlerFunc {
 			return
 		}
 
-		balance, err := s.accountManager.GetBalance(c, account)
+		balance, err := s.accountManager.GetBalance(c, &account.PaymentAccount)
 		if err != nil {
 			// c.String(500, "Failed to get account balance post-registration\nBut, don't worry, your account is successfully created")
 			return
