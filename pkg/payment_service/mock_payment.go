@@ -31,7 +31,11 @@ func (*MockPaymentService) GetMatchingHistory(ctx context.Context, account *plat
 	if util.LeaveItToRNG() && false {
 		return nil, errors.New("Oops! Failed to get matching history")
 	} else {
-		note := "Received from " + account.UserUUID.String()
+		note := fmt.Sprintf(
+			"Received amount [%d] from account [%s, service: %s], sender [%s].",
+			history.Mutation*-1, history.AccountUUID, history.ServiceID, history.IssuerUUID,
+		)
+
 		match := *history
 		match.TransactionNote = &note
 		match.AccountUUID = *history.DestUUID
