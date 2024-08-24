@@ -175,7 +175,9 @@ added access permissions to the accounts are:
 - Subscription permission
 
 By default, payment account's owner has full control over the account, obviously, and only the owner can add permissions
-or revoke permissions to other accounts.
+or revoke permissions to other users.
+
+This feature is fully optional and there is no change to the current flow of the platform, aside from added feature.
 
 ## Major dependencies:
 
