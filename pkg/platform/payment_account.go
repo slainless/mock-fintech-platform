@@ -8,7 +8,7 @@ type SharedAccountAccess struct {
 
 type PaymentAccount struct {
 	model.PaymentAccounts
-	Permission int16
+	Permission int32
 }
 
 type PaymentAccountDetail struct {

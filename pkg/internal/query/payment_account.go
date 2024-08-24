@@ -26,7 +26,12 @@ const (
 func GetAllAccountsWithAccess(ctx context.Context, db *sql.DB, userUUID uuid.UUID, access AccountPermission) ([]platform.PaymentAccount, error) {
 	stmt := SELECT(
 		table.PaymentAccounts.AllColumns,
-		COALESCE(table.SharedAccountAccess.Permission, Int16(int16(AccountPermissionAll))).AS("Permission"),
+		COALESCE(
+			table.SharedAccountAccess.Permission,
+			CASE(table.PaymentAccounts.UserUUID).
+				WHEN(UUID(userUUID)).THEN(Int32(int32(AccountPermissionAll))).
+				ELSE(Int32(int32(AccountPermissionBase))),
+		).AS("PaymentAccount.Permission"),
 	).
 		FROM(
 			table.PaymentAccounts.
@@ -36,10 +41,10 @@ func GetAllAccountsWithAccess(ctx context.Context, db *sql.DB, userUUID uuid.UUI
 			table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)).
 				OR(
 					table.SharedAccountAccess.UserUUID.EQ(UUID(userUUID)).
-						AND(table.SharedAccountAccess.Permission.BIT_AND(Int16(int16(access))).EQ(Int16(int16(access)))),
+						AND(table.SharedAccountAccess.Permission.BIT_AND(Int32(int32(access))).EQ(Int32(int32(access)))),
 				),
 		).
-		GROUP_BY(table.PaymentAccounts.UUID)
+		GROUP_BY(table.PaymentAccounts.UUID, table.SharedAccountAccess.AccountUUID, table.SharedAccountAccess.UserUUID)
 
 	accounts := make([]platform.PaymentAccount, 0)
 	err := stmt.QueryContext(ctx, db, &accounts)
@@ -67,7 +72,12 @@ func GetAccount(ctx context.Context, db *sql.DB, accountUUID uuid.UUID) (*platfo
 func GetAccountWithAccess(ctx context.Context, db *sql.DB, userUUID, accountUUID uuid.UUID, access AccountPermission) (*platform.PaymentAccount, error) {
 	stmt := SELECT(
 		table.PaymentAccounts.AllColumns,
-		COALESCE(table.SharedAccountAccess.Permission, Int16(int16(AccountPermissionAll))).AS("Permission"),
+		COALESCE(
+			table.SharedAccountAccess.Permission,
+			CASE(table.PaymentAccounts.UserUUID).
+				WHEN(UUID(userUUID)).THEN(Int32(int32(AccountPermissionAll))).
+				ELSE(Int32(int32(AccountPermissionBase))),
+		).AS("PaymentAccount.Permission"),
 	).
 		FROM(
 			table.PaymentAccounts.
@@ -78,10 +88,10 @@ func GetAccountWithAccess(ctx context.Context, db *sql.DB, userUUID, accountUUID
 				AND(OR(
 					table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)),
 					table.SharedAccountAccess.UserUUID.EQ(UUID(userUUID)).
-						AND(table.SharedAccountAccess.Permission.BIT_AND(Int16(int16(access))).EQ(Int16(int16(access)))),
+						AND(table.SharedAccountAccess.Permission.BIT_AND(Int32(int32(access))).EQ(Int32(int32(access)))),
 				)),
 		).
-		GROUP_BY(table.PaymentAccounts.UUID)
+		GROUP_BY(table.PaymentAccounts.UUID, table.SharedAccountAccess.UserUUID)
 
 	var account platform.PaymentAccount
 	err := stmt.QueryContext(ctx, db, &account)

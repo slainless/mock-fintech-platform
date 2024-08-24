@@ -33,7 +33,7 @@ func GetHistoriesOfAccountWithAccess(ctx context.Context, db *sql.DB, userUUID, 
 				AND(OR(
 					table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)),
 					table.SharedAccountAccess.UserUUID.EQ(UUID(userUUID)).
-						AND(table.SharedAccountAccess.Permission.BIT_AND(Int16(int16(access))).EQ(Int16(int16(access)))),
+						AND(table.SharedAccountAccess.Permission.BIT_AND(Int32(int32(access))).EQ(Int32(int32(access)))),
 				)),
 		).
 		GROUP_BY(table.TransactionHistories.UUID)
@@ -53,7 +53,7 @@ func GetHistoriesWithAccess(ctx context.Context, db *sql.DB, userUUID uuid.UUID,
 			OR(
 				table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)),
 				table.SharedAccountAccess.UserUUID.EQ(UUID(userUUID)).
-					AND(table.SharedAccountAccess.Permission.BIT_AND(Int16(int16(access))).EQ(Int16(int16(access)))),
+					AND(table.SharedAccountAccess.Permission.BIT_AND(Int32(int32(access))).EQ(Int32(int32(access)))),
 			).AND(table.TransactionHistories.TransactionDate.GT_EQ(TimestampT(from))).
 				AND(table.TransactionHistories.TransactionDate.LT_EQ(TimestampT(to))),
 		).

@@ -36,7 +36,7 @@ func GetRecurringPaymentWithAccess(ctx context.Context, db *sql.DB, userUUID, uu
 				AND(OR(
 					table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)),
 					table.SharedAccountAccess.UserUUID.EQ(UUID(userUUID)).
-						AND(table.SharedAccountAccess.Permission.BIT_AND(Int16(int16(access))).EQ(Int16(int16(access)))),
+						AND(table.SharedAccountAccess.Permission.BIT_AND(Int32(int32(access))).EQ(Int32(int32(access)))),
 				)),
 		).
 		GROUP_BY(table.RecurringPayments.UUID)
