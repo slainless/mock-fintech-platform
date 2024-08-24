@@ -3,6 +3,7 @@ package payment_service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math/rand"
 	"time"
 
@@ -42,11 +43,23 @@ func (*MockPaymentService) GetMatchingHistory(ctx context.Context, account *plat
 }
 
 // Send implements platform.PaymentService.
-func (*MockPaymentService) Send(ctx context.Context, user *platform.User, source *platform.PaymentAccount, des *platform.PaymentAccount, amount int64) (*platform.TransactionHistory, error) {
+func (*MockPaymentService) Send(ctx context.Context, user *platform.User, source *platform.PaymentAccount, des *platform.PaymentAccount, amount int64, callbackData string) (*platform.TransactionHistory, error) {
 	util.MockSleep(3 * time.Second)
 	if util.LeaveItToRNG() {
 		return nil, errors.New("Failed to send money")
 	} else {
+		var extraNote string
+		if user.UUID != source.UserUUID {
+			extraNote = fmt.Sprintf("This is issued by shared user")
+		} else {
+			extraNote = fmt.Sprintf("This is issued by owner")
+		}
+
+		note := fmt.Sprintf(
+			"User [%s] sending from account [%s, service: %s] with amount [%d] to account [%s, service: %s]. (note: %s)",
+			user.UUID, source.UUID, source.ServiceID, amount, des.UUID, des.ServiceID, extraNote,
+		)
+
 		return &platform.TransactionHistory{
 			TransactionHistories: model.TransactionHistories{
 				UUID:            uuid.New(),
@@ -55,6 +68,7 @@ func (*MockPaymentService) Send(ctx context.Context, user *platform.User, source
 				Mutation:        amount * -1,
 				Currency:        "USD",
 				TransactionDate: time.Now(),
+				TransactionNote: &note,
 				IssuerUUID:      &user.UUID,
 			},
 			ServiceID: source.ServiceID,
@@ -79,6 +93,17 @@ func (*MockPaymentService) Withdraw(ctx context.Context, user *platform.User, ac
 	if util.LeaveItToRNG() {
 		return nil, errors.New("Failed to withdraw money")
 	} else {
+		var extraNote string
+		if user.UUID != account.UserUUID {
+			extraNote = fmt.Sprintf("This is issued by shared user")
+		} else {
+			extraNote = fmt.Sprintf("This is issued by owner")
+		}
+
+		note := fmt.Sprintf(
+			"User [%s] withdrawing from account [%s, service: %s] with amount [%d]. Callback data: %s. (note: %s)",
+			user.UUID, account.UUID, account.ServiceID, amount, callbackData, extraNote,
+		)
 		return &platform.TransactionHistory{
 			TransactionHistories: model.TransactionHistories{
 				UUID:            uuid.New(),
@@ -87,6 +112,7 @@ func (*MockPaymentService) Withdraw(ctx context.Context, user *platform.User, ac
 				Currency:        "USD",
 				TransactionDate: time.Now(),
 				IssuerUUID:      &user.UUID,
+				TransactionNote: &note,
 			},
 			ServiceID: account.ServiceID,
 			UserUUID:  account.UserUUID,

@@ -8,9 +8,10 @@ import (
 )
 
 type SendPayload struct {
-	AccountUUID string `json:"account" form:"account_id" binding:"required,uuid"`
-	DestUUID    string `json:"dest" form:"dest_id" binding:"required,uuid"`
-	Amount      int64  `json:"amount" form:"amount" binding:"required,max=999999999999999,min=1"`
+	AccountUUID  string `json:"account" form:"account_id" binding:"required,uuid"`
+	DestUUID     string `json:"dest" form:"dest_id" binding:"required,uuid"`
+	Amount       int64  `json:"amount" form:"amount" binding:"required,max=999999999999999,min=1"`
+	CallbackData string `json:"callback" form:"callback"`
 }
 
 type SendResponse struct {
@@ -63,7 +64,7 @@ func (s *Service) send() gin.HandlerFunc {
 			return
 		}
 
-		history, err := s.paymentManager.Send(c, user, from, to, send.Amount)
+		history, err := s.paymentManager.Send(c, user, from, to, send.Amount, send.CallbackData)
 		if err != nil {
 			switch err {
 			case core.ErrPaymentServiceNotSupported:
