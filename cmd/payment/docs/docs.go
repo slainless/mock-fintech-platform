@@ -310,9 +310,6 @@ const docTemplate = `{
                 "foreignID": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "lastCharge": {
                     "type": "string"
                 },
@@ -342,13 +339,13 @@ const docTemplate = `{
                 "destUUID": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
+                "issuerUUID": {
+                    "type": "string"
                 },
                 "mutation": {
                     "type": "integer"
                 },
-                "serviceUUID": {
+                "serviceID": {
                     "type": "string"
                 },
                 "status": {

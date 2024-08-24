@@ -89,8 +89,6 @@ definitions:
         type: integer
       foreignID:
         type: string
-      id:
-        type: integer
       lastCharge:
         type: string
       schedulerType:
@@ -110,11 +108,11 @@ definitions:
         type: string
       destUUID:
         type: string
-      id:
-        type: integer
+      issuerUUID:
+        type: string
       mutation:
         type: integer
-      serviceUUID:
+      serviceID:
         type: string
       status:
         type: integer

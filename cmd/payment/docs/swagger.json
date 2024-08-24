@@ -301,9 +301,6 @@
                 "foreignID": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "lastCharge": {
                     "type": "string"
                 },
@@ -333,13 +330,13 @@
                 "destUUID": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
+                "issuerUUID": {
+                    "type": "string"
                 },
                 "mutation": {
                     "type": "integer"
                 },
-                "serviceUUID": {
+                "serviceID": {
                     "type": "string"
                 },
                 "status": {
