@@ -22,6 +22,8 @@ services:
     command: migrate -database ${POSTGRESQL_URL} -path db/migrations up
     env_file:
       - ./.env
+    depends_on:
+      - postgres
   user:
     build:
       context: .
