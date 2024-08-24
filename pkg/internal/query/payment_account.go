@@ -180,3 +180,29 @@ func SetPermission(ctx context.Context, db *sql.DB, userUUID, accountUUID uuid.U
 	_, err := stmt.ExecContext(ctx, db)
 	return err
 }
+
+func GetAccountDetail(ctx context.Context, db *sql.DB, userUUID, accountUUID uuid.UUID) (*platform.PaymentAccountDetail, error) {
+	stmt := SELECT(
+		table.PaymentAccounts.AllColumns,
+		table.SharedAccountAccess.AllColumns,
+	).
+		FROM(
+			table.PaymentAccounts.
+				LEFT_JOIN(table.SharedAccountAccess, table.PaymentAccounts.UUID.EQ(table.SharedAccountAccess.AccountUUID)),
+		).
+		WHERE(
+			table.PaymentAccounts.UUID.EQ(UUID(accountUUID)).
+				AND(OR(
+					table.PaymentAccounts.UserUUID.EQ(UUID(userUUID)),
+					table.SharedAccountAccess.UserUUID.EQ(UUID(userUUID)),
+				)),
+		)
+
+	var account platform.PaymentAccountDetail
+	err := stmt.QueryContext(ctx, db, &account)
+	if err != nil {
+		return nil, err
+	}
+
+	return &account, nil
+}

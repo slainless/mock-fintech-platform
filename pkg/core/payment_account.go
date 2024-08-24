@@ -191,3 +191,26 @@ func (m *PaymentAccountManager) SetPermission(ctx context.Context, userUUID, acc
 	}
 	return nil
 }
+
+func (m *PaymentAccountManager) GetAccountDetail(ctx context.Context, user *platform.User, accountUUID uuid.UUID) (*platform.PaymentAccountDetail, error) {
+	account, err := query.GetAccountDetail(ctx, m.db, user.UUID, accountUUID)
+	if err != nil {
+		if err == qrm.ErrNoRows {
+			return nil, ErrAccountNotFound
+		}
+		m.errorTracker.Report(ctx, err)
+		return nil, err
+	}
+
+	if account.UserUUID == user.UUID {
+		for _, access := range account.Permissions {
+			if access.UserUUID == uuid.Nil {
+				access.UserUUID = user.UUID
+				access.AccountUUID = accountUUID
+				access.Permission = int32(AccountPermissionAll)
+			}
+		}
+	}
+
+	return account, nil
+}

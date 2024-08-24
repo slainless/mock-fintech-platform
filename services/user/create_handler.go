@@ -49,6 +49,14 @@ func (s *Service) create() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(201, AccountResponse{Account: account, Balance: balance})
+		access := platform.SharedAccountAccess{}
+		access.AccountUUID = account.UUID
+		access.UserUUID = user.UUID
+		access.Permission = int32(core.AccountPermissionAll)
+
+		c.JSON(201, AccountResponse{Account: &platform.PaymentAccountDetail{
+			PaymentAccount: *account,
+			Permissions:    []platform.SharedAccountAccess{access},
+		}, Balance: balance})
 	}
 }
